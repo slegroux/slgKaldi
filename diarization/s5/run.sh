@@ -15,7 +15,6 @@ vaddir=mfcc
 . ./utils/parse_options.sh
 
 np=$(( $(nproc) - 1 ))
-
 set -x
 
 # data preprocessing
@@ -74,4 +73,20 @@ if [ $stage -eq 5 ]; then
         --cmd "run.pl" \
         --target-energy 0.9 --nj 20 $nnet_dir/xvectors_sre_combined/ \
         $nnet_dir/xvectors $nnet_dir/xvectors/plda_scores
+fi
+
+# supervised clustering
+if [ $stage -eq 6 ]; then
+    diarization/cluster.sh --cmd "$train_cmd_intel --mem 4G" --nj 20 \
+        --reco2num-spk $data_dir/reco2num_spk \
+        $nnet_dir/xvectors/plda_scores \
+        $nnet_dir/xvectors/plda_scores_speakers
+fi
+
+# unsupervised clustering
+if [ $stage -eq 61 ]; then
+    diarization/cluster.sh --cmd "$train_cmd_intel --mem 4G" --nj 40 \
+        --threshold $threshold \
+        $nnet_dir/xvectors/plda_scores \
+        $nnet_dir/xvectors/plda_scores_speakers
 fi
