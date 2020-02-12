@@ -1,10 +1,10 @@
 exp/
-data/
+#data/
 data.bu/
 mfcc/
 input/
 waves_yesno/
-local/
+#local/
 mfcc_aug/
 *.zip
 *.tar.gz
