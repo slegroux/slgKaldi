@@ -3,10 +3,10 @@
 # kaldi diarization tutorial
 # 2020 sylvain.legroux@gmail.com
 
-set -x
+
 . path.sh
 
-stage=0
+stage=-1
 audio_dir=data/audio
 dataset=test
 mfccdir=mfcc
@@ -17,6 +17,12 @@ nnet_dir=/home/workfit/Sylvain/Data/kaldi_models/0003_sre16_v2_1a/exp
 
 np=$(( $(nproc) - 1 ))
 set -x
+
+
+# link to utils
+if [ $stage -eq -1 ]; then
+    ./create_links.sh
+fi
 
 # data preprocessing
 if [ $stage -eq 0 ]; then
