@@ -11,6 +11,7 @@ audio_dir=data/audio
 dataset=test
 mfccdir=mfcc
 vaddir=mfcc
+nnet_dir=/home/workfit/Sylvain/Data/kaldi_models/0003_sre16_v2_1a/exp
 
 . ./utils/parse_options.sh
 
@@ -64,20 +65,20 @@ fi
 if [ $stage -eq 4 ]; then
     diarization/nnet3/xvector/extract_xvectors.sh --nj $nj --cmd "run.pl" \
         --window 1.5 --period 0.75 --apply-cmn false --min-segment 0.5 \
-        $nnet_dir $cmn_dir $nnet_dir/exp/xvectors
+        $nnet_dir/xvector_nnet_1a data/${dataset}_segmented exp/xvectors_${dataset}
 fi
 
 # scoring
 if [ $stage -eq 5 ]; then
     diarization/nnet3/xvector/score_plda.sh \
         --cmd "run.pl" \
-        --target-energy 0.9 --nj 20 $nnet_dir/xvectors_sre_combined/ \
-        $nnet_dir/xvectors $nnet_dir/xvectors/plda_scores
+        --target-energy 0.9 --nj $nj $nnet_dir/xvectors_sre_combined/ \
+        exp/xvectors_${dataset} exp/xvectors_${dataset}/plda_scores
 fi
 
 # supervised clustering
 if [ $stage -eq 6 ]; then
-    diarization/cluster.sh --cmd "$train_cmd_intel --mem 4G" --nj 20 \
+    diarization/cluster.sh --cmd "run.pl" --nj $nj \
         --reco2num-spk $data_dir/reco2num_spk \
         $nnet_dir/xvectors/plda_scores \
         $nnet_dir/xvectors/plda_scores_speakers
@@ -85,8 +86,9 @@ fi
 
 # unsupervised clustering
 if [ $stage -eq 61 ]; then
-    diarization/cluster.sh --cmd "$train_cmd_intel --mem 4G" --nj 40 \
+    threshold=0.5
+    diarization/cluster.sh --cmd "run.pl" --nj $nj \
         --threshold $threshold \
-        $nnet_dir/xvectors/plda_scores \
-        $nnet_dir/xvectors/plda_scores_speakers
+        exp/xvectors_${dataset}/plda_scores \
+        exp/xvectors_${dataset}/plda_scores_speakers
 fi
