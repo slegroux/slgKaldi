@@ -11,5 +11,6 @@ fi
 
 while IFS= read -r line; do
     id=$(echo $line | cut -d' ' -f1)
-    cat $rttm | grep -w $id > data/${dataset}/rttm/${id}.rttm
+    # replace channel by 1 for der computations to work
+    cat $rttm | awk '{ $3=1; print $0 }' |grep -w $id > data/${dataset}/rttm/${id}.rttm
 done <data/$dataset/wav.scp
