@@ -3,7 +3,6 @@
 # kaldi diarization tutorial
 # 2020 sylvain.legroux@gmail.com
 
-
 . path.sh
 
 stage=-1
@@ -108,4 +107,10 @@ if [ $stage -eq 71 ]; then
         exp/xvectors_${dataset}/plda_scores_speakers_unsupervised
 fi
 
-# 
+# generate sv
+if [ $stage -eq 8 ]; then
+    ./local/split_rttm.sh
+    for i in data/${dataset}/rttm/*.rttm; do
+        ./local/rttm2sv.sh $i
+    done
+fi

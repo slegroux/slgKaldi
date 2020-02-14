@@ -2,6 +2,9 @@
 
 dataset=test
 rttm=$(find . -type f -name rttm)
+
+. utils/parse_options.sh
+
 if [ ! -d data/${dataset}/rttm ]; then
     mkdir -p data/${dataset}/rttm
 fi
