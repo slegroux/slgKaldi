@@ -1,5 +1,9 @@
 exp/
 #data/
+data/test/
+data/test_cmn/
+data/test_cmn_segmented/
+diarization
 data.bu/
 mfcc/
 input/
