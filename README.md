@@ -6,6 +6,6 @@
 
 # Kaldi recipes
 ## Description
-A collection of recipes for speech recognition, diarization & language modeling
+A collection of Kaldi recipes for speech recognition, diarization & language modeling
 ## Authors
 <slegroux@ccrma.stanford.edu> 2020
