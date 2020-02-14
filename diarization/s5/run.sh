@@ -15,7 +15,7 @@ nnet_dir=/home/workfit/Sylvain/Data/kaldi_models/0003_sre16_v2_1a/exp
 . ./utils/parse_options.sh
 
 np=$(( $(nproc) - 1 ))
-set -x
+#set -x
 
 
 # link to utils
@@ -103,13 +103,18 @@ if [ $stage -eq 71 ]; then
     threshold=0.5
     diarization/cluster.sh --cmd "run.pl" --nj $nj \
         --threshold $threshold \
-        exp/xvectors_${dataset}/plda_scores \
-        exp/xvectors_${dataset}/plda_scores_speakers_unsupervised
+        exp/xvectors_${dataset}_cmn_segmented/plda_scores \
+        exp/xvectors_${dataset}_cmn_segmented/plda_scores_speakers_unsupervised
 fi
 
 # generate sv
 if [ $stage -eq 8 ]; then
-    ./local/split_rttm.sh
+    rttm_supervised=exp/xvectors_${dataset}_cmn_segmented/plda_scores_speakers_supervised/rttm
+    rttm_unsupervised=exp/xvectors_${dataset}_cmn_segmented/plda_scores_speakers_unsupervised/rttm
+    
+    ./local/split_rttm.sh --ext 's.rttm' $rttm_supervised
+    ./local/split_rttm.sh --ext 'u.rttm' $rttm_unsupervised
+
     for i in data/${dataset}/rttm/*.rttm; do
         ./local/rttm2sv.sh $i
     done
