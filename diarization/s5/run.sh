@@ -43,13 +43,13 @@ else
     echo "need utt2spk file. run stage 0"
 fi
 
-# feature extraction
+# mfcc
 if [ $stage -eq 1 ]; then
     steps/make_mfcc.sh --mfcc-config conf/mfcc.conf --nj $nj \
       --cmd "run.pl" --write-utt2num-frames true \
       data/$dataset exp/make_mfcc $mfccdir
-    steps/compute_cmvn_stats.sh data/$dataset exp/make_mfcc $mfccdir
-    utils/fix_data_dir.sh data/$dataset
+    #steps/compute_cmvn_stats.sh data/$dataset exp/make_mfcc $mfccdir
+    utils/fix_data_dir.sh data/${dataset}
 fi
 
 # vad
@@ -57,44 +57,55 @@ if [ $stage -eq 2 ]; then
     sid/compute_vad_decision.sh --nj $nj --cmd "run.pl" \
         --vad-config conf/vad.conf \
         data/$dataset exp/make_vad $vaddir
-    utils/fix_data_dir.sh data/$dataset
+    utils/fix_data_dir.sh data/${dataset}
 fi
 
-# segment
+# cmn xvectors
 if [ $stage -eq 3 ]; then
+    ./local/nnet3/xvector/prepare_feats.sh --nj $nj \
+        --cmd "run.pl" data/$dataset data/${dataset}_cmn exp/make_xvectors
+    cp data/$dataset/vad.scp data/${dataset}_cmn/
+    utils/fix_data_dir.sh data/${dataset}_cmn
+fi
+
+# segment on cmn data
+if [ $stage -eq 4 ]; then
     diarization/vad_to_segments.sh --nj $nj --cmd "run.pl" \
-    data/$dataset data/${dataset}_segmented
-    utils/fix_data_dir.sh data/${dataset}_segmented
+    data/${dataset}_cmn data/${dataset}_cmn_segmented
+    utils/fix_data_dir.sh data/${dataset}_cmn_segmented
 fi
 
 # xvectors
-if [ $stage -eq 4 ]; then
+if [ $stage -eq 5 ]; then
     diarization/nnet3/xvector/extract_xvectors.sh --nj $nj --cmd "run.pl" \
         --window 1.5 --period 0.75 --apply-cmn false --min-segment 0.5 \
-        $nnet_dir/xvector_nnet_1a data/${dataset}_segmented exp/xvectors_${dataset}
+        $nnet_dir/xvector_nnet_1a data/${dataset}_cmn_segmented exp/xvectors_${dataset}_cmn_segmented
 fi
 
 # scoring
-if [ $stage -eq 5 ]; then
+if [ $stage -eq 6 ]; then
     diarization/nnet3/xvector/score_plda.sh \
         --cmd "run.pl" \
         --target-energy 0.9 --nj $nj $nnet_dir/xvectors_sre_combined/ \
-        exp/xvectors_${dataset} exp/xvectors_${dataset}/plda_scores
+        exp/xvectors_${dataset}_cmn_segmented exp/xvectors_${dataset}_cmn_segmented/plda_scores
 fi
 
 # supervised clustering
-if [ $stage -eq 6 ]; then
+if [ $stage -eq 7 ]; then
+
     diarization/cluster.sh --cmd "run.pl" --nj $nj \
-        --reco2num-spk $data_dir/reco2num_spk \
-        $nnet_dir/xvectors/plda_scores \
-        $nnet_dir/xvectors/plda_scores_speakers
+        --reco2num-spk data/reco2num_spk \
+        exp/xvectors_${dataset}_cmn_segmented/plda_scores \
+        exp/xvectors_${dataset}_cmn_segmented/plda_scores_speakers_supervised
 fi
 
 # unsupervised clustering
-if [ $stage -eq 61 ]; then
+if [ $stage -eq 71 ]; then
     threshold=0.5
     diarization/cluster.sh --cmd "run.pl" --nj $nj \
         --threshold $threshold \
         exp/xvectors_${dataset}/plda_scores \
-        exp/xvectors_${dataset}/plda_scores_speakers
+        exp/xvectors_${dataset}/plda_scores_speakers_unsupervised
 fi
+
+# 

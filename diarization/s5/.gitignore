@@ -8,6 +8,9 @@ waves_yesno/
 mfcc_aug/
 *.zip
 *.tar.gz
+*.sv
+*.rttm
+*.sonic
 OpenSubtitles.en-es.en
 OpenSubtitles.en-es.es
 OpenSubtitles.en-es.ids
