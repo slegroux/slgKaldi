@@ -91,15 +91,25 @@ fi
 
 # supervised clustering
 if [ $stage -eq 7 ]; then
-
     diarization/cluster.sh --cmd "run.pl" --nj $nj \
         --reco2num-spk data/reco2num_spk \
         exp/xvectors_${dataset}_cmn_segmented/plda_scores \
         exp/xvectors_${dataset}_cmn_segmented/plda_scores_speakers_supervised
 fi
 
-# unsupervised clustering
+# eval
 if [ $stage -eq 71 ]; then
+    hyp=exp/xvectors_${dataset}_cmn_segmented/plda_scores_speakers_supervised/rttm
+    cat data/test/rttm/fullref.rttm| awk '{ $3=0; print $0 }' > data/test/rttm/fullref_0.rttm
+    ref=data/test/rttm/fullref_0.rttm
+    md-eval.pl -1 -c 0.25 -r $ref -s $hyp > DER.txt
+    der=$(grep -oP 'DIARIZATION\ ERROR\ =\ \K[0-9]+([.][0-9]+)?' \
+        DER.txt)
+    echo "Using the oracle number of speakers, DER: $der%"
+fi
+
+# unsupervised clustering
+if [ $stage -eq 8 ]; then
     threshold=0.5
     diarization/cluster.sh --cmd "run.pl" --nj $nj \
         --threshold $threshold \
@@ -108,7 +118,7 @@ if [ $stage -eq 71 ]; then
 fi
 
 # generate sv
-if [ $stage -eq 8 ]; then
+if [ $stage -eq 9 ]; then
     rttm_supervised=exp/xvectors_${dataset}_cmn_segmented/plda_scores_speakers_supervised/rttm
     rttm_unsupervised=exp/xvectors_${dataset}_cmn_segmented/plda_scores_speakers_unsupervised/rttm
     
