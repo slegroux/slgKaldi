@@ -5,8 +5,8 @@
 
 stage=0
 
-datadir=$DATA/Spanish/common_voice
-
+datadir=$DATA/commonvoice_spanish
+slgasr_dir=~/slgASR
 # The corpus and lexicon are on openslr.org
 #speech_url="http://www.openslr.org/resources/39/LDC2006S37.tar.gz"
 lexicon_url="http://www.openslr.org/resources/34/santiago.tar.gz"
@@ -43,7 +43,7 @@ fi
 
 if [ $stage -le 1 ]; then
   echo "Making lists for building models."
-  local/prepare_data.sh $datadir
+  local/prepare_data.sh --slgasr_dir $slgasr_dir --stage 1 $datadir
 fi
 
 if [ $stage -le 2 ]; then

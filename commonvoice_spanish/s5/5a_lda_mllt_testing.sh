@@ -1,14 +1,14 @@
 #!/bin/bash
 
 njobs=$(($(nproc)-1))
-test_set=test
+test_set=test_35
 lang=data/lang_test
 compute_graph=true
 
 . ./path.sh
 . utils/parse_options.sh
 
-n_speakers_test=$(cat data/test/spk2utt | wc -l)
+n_speakers_test=$(cat data/${test_set}/spk2utt | wc -l)
 graph_dir=exp/tri2b/graph
 
 
@@ -27,7 +27,7 @@ if $compute_graph; then
 fi
 
 #Decoder
-steps/decode.sh --nj $nj $graph_dir data/${test_set} exp/tri2b/decode_${test_set}
+steps/decode.sh --nj $n_speakers_test $graph_dir data/${test_set} exp/tri2b/decode_${test_set}
 
 echo "LDA MLLT training" | tee -a WER.txt
 for x in exp/tri2b/decode_${test_set}; do

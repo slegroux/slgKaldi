@@ -8,13 +8,13 @@ stage=14
 
 gmm=tri3b
 nnet3_affix=_online_cmn
-affix=64k #tdnn
+affix=f_ivec_specaug
 #affix=1a76b #cnntdnn
 tree_affix=
 train_set=train
 
 train_stage=-10
-num_epochs=50
+num_epochs=250
 
 srand=0
 chunk_width=140,100,160
@@ -65,7 +65,7 @@ if [ $stage -le 14 ]; then
     --trainer.num-epochs=$num_epochs \
     --trainer.frames-per-iter=3000000 \
     --trainer.optimization.num-jobs-initial=2 \
-    --trainer.optimization.num-jobs-final=2 \
+    --trainer.optimization.num-jobs-final=8 \
     --trainer.optimization.initial-effective-lrate=0.002 \
     --trainer.optimization.final-effective-lrate=0.0002 \
     --trainer.num-chunk-per-minibatch=128,64 \

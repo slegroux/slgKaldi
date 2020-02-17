@@ -5,9 +5,7 @@ set -euo pipefail
 
 stage=13
 nnet3_affix=_online_cmn
-affix=64k
-tree_affix=
-
+affix=f_ivec_specaug
 xent_regularize=0.1
 
 echo "$0 $@"  # Print the command line for logging
@@ -16,16 +14,9 @@ echo "$0 $@"  # Print the command line for logging
 . ./path.sh
 . ./utils/parse_options.sh
 
-if ! cuda-compiled; then
-  cat <<EOF && exit 1
-This script is intended to be used with GPUs but you have not compiled Kaldi with CUDA
-If you want to use GPUs (and have them), go to src/, and configure and make on a machine
-where "nvcc" is installed.
-EOF
-fi
 
 dir=exp/chain${nnet3_affix}/tdnn${affix}_sp
-tree_dir=exp/chain${nnet3_affix}/tree_sp${tree_affix:+_$tree_affix}
+tree_dir=exp/chain${nnet3_affix}/tree_sp
 
 if [ $stage -le 13 ]; then
   mkdir -p $dir

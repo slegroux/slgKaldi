@@ -19,22 +19,6 @@ echo "$0 $@"  # Print the command line for logging
 . ./path.sh
 . ./utils/parse_options.sh
 
-n_speakers_test=$(cat data/test/spk2utt| wc -l)
-njobs=$(($(nproc)-1))
-if [ $njobs -le $n_speakers_test ]; then
-  decode_nj=$njobs
-else
-  decode_nj=$n_speakers_test
-fi
-
-
-if ! cuda-compiled; then
-  cat <<EOF && exit 1
-This script is intended to be used with GPUs but you have not compiled Kaldi with CUDA
-If you want to use GPUs (and have them), go to src/, and configure and make on a machine
-where "nvcc" is installed.
-EOF
-fi
 
 
 # Problem: We have removed the "train_" prefix of our training set in

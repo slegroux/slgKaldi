@@ -8,13 +8,13 @@
 . ./path.sh
 
 stage=0
-common_voice_dir=$DATA/Spanish/common_voice
+
+slgasr_dir=$PROJECTS/slgASR/
 
 . ./utils/parse_options.sh
 
-
+common_voice_dir=$1
 kaldi_data_dir=$(realpath data)
-slgasr_dir=$PROJECTS/slgASR/
 
 # archive, fix path and convert audio
 if [ $stage -le 0 ]; then
@@ -44,6 +44,7 @@ if [ $stage -le 0 ]; then
         fi
         # specific file is corrupted
         sed -i '/common_voice_es_19499893/d' train.tsv
+        sed -i '/common_voice_es_19499901/d' train.tsv
     popd
 fi
 

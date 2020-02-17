@@ -54,7 +54,7 @@ if [ $stage -le 3 ]; then
   echo "$0: creating high-resolution MFCC features"
   mfccdir=data/${train_set}_sp_hires/data
 
-  for datadir in ${train_set}_sp ${test_sets}; do
+  for datadir in ${train_set}_sp; do #${test_sets}; do
     utils/copy_data_dir.sh data/$datadir data/${datadir}_hires
   done
 
@@ -62,7 +62,7 @@ if [ $stage -le 3 ]; then
   # features; this helps make trained nnets more invariant to test data volume.
   utils/data/perturb_data_dir_volume.sh data/${train_set}_sp_hires || exit 1;
 
-  for datadir in ${train_set}_sp ${test_sets}; do
+  for datadir in ${train_set}_sp; do #${test_sets}; do
     steps/make_mfcc.sh --nj $njobs --mfcc-config conf/mfcc_hires.conf \
       --cmd "$train_cmd" data/${datadir}_hires || exit 1;
     steps/compute_cmvn_stats.sh data/${datadir}_hires || exit 1;
@@ -136,19 +136,6 @@ if [ $stage -le 7 ]; then
     ${temp_data_root}/${train_set}_sp_hires_max2 \
     exp/nnet3${nnet3_affix}/extractor $ivectordir
 
-  # Also extract iVectors for the test data, but in this case we don't need the speed
-  # perturbation (sp).
-  if [ $njobs -le $n_speakers_test ]; then
-    nj=$njobs
-  else
-    nj=$n_speakers_test
-  fi
-
-  for data in $test_sets; do
-    steps/online/nnet2/extract_ivectors_online.sh --cmd "$train_cmd" --nj $nj \
-      data/${data}_hires exp/nnet3${nnet3_affix}/extractor \
-      exp/nnet3${nnet3_affix}/ivectors_${data}_hires
-  done
 fi
 
 exit 0
