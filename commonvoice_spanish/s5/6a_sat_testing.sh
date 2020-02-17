@@ -9,7 +9,7 @@ compute_graph=true
 . ./path.sh
 . utils/parse_options.sh
 
-n_speakers_test=$(cat data/test/spk2utt | wc -l)
+n_speakers_test=$(cat data/${test_set}/spk2utt | wc -l)
 graph_dir=exp/tri3b/graph
 
 echo ============================================================================

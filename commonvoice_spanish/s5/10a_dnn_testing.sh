@@ -8,14 +8,12 @@ stage=16
 
 gmm=tri3b
 nnet3_affix=_online_cmn
-affix=64k #tdnn
-#affix=1a76b #cnntdnn
+affix=f_ivec_specaug
 tree_affix=
 chunk_width=140,100,160
 
 lang=data/lang_test
 
-train_set=train
 test_set=test_35
 test_online_decoding=true
 
@@ -54,11 +52,20 @@ if $compute_graph; then
 fi
 
 if [ $stage -le 16 ]; then
-
+  #Decoder
+  if [ $njobs -le $n_speakers_test ]; then
+    nj=$njobs
+  else  
+    nj=$n_speakers_test
+  fi
+  if [ ! -d exp/nnet3${nnet3_affix}/ivectors_${test_set}_hires ]; then
+    echo "compute dataset hires ivecs"
+    ./7a_ivector_testing.sh --test_set ${test_set}
+  fi
   steps/nnet3/decode.sh \
       --acwt 1.0 --post-decode-acwt 10.0 \
       --frames-per-chunk $frames_per_chunk \
-      --nj 35 --cmd "$decode_cmd"  --num-threads 4 \
+      --nj $nj --cmd "run.pl" \
       --online-ivector-dir exp/nnet3${nnet3_affix}/ivectors_${test_set}_hires \
       $tree_dir/graph_tgsmall data/${test_set}_hires ${dir}/decode_tgsmall_${test_set} || exit 1
   

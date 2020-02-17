@@ -4,10 +4,8 @@
 set -euo pipefail
 
 njobs=$(($(nproc)-1))
-gmm=tri3b
-online_cmvn_iextractor=true
+
 nnet3_affix=_online_cmn
-train_set=train
 test_set=test_35
 stage=0
 
