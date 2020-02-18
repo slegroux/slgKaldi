@@ -7,6 +7,32 @@ from shutil import copyfile, rmtree
 import uuid
 import argparse
 from IPython import embed
+from pathlib import Path
+import csv
+import json
+
+
+def rttm2json(rttm_path:Path)->str:
+
+    diarized = {'num_speakers': None, 'segments': None}
+    output = {'request_id': None, 'response': None}
+    segments = []
+    unique_spk = set()
+
+    with Path(rttm_path).open() as f:
+        csv_reader = csv.reader(f, delimiter=' ')    
+        for row in csv_reader:
+            segment = {'speaker_id': None, 'start': None, 'end': None}
+            segment['start'] = float(row[3])
+            segment['end'] = segment['start'] + float(row[4])
+            segment['speaker_id'] = row[7]
+            unique_spk.add(segment['speaker_id'])
+            segments.append(segment)
+    
+    diarized = {'num_speakers': len(unique_spk), 'segments': segments}
+    output = {'request_id': Path(rttm_path).stem, 'response': diarized}
+    return(json.dumps(output))
+
 
 def diarize(audio_path:str, n_speakers:int)->str:
     
@@ -27,7 +53,7 @@ def diarize(audio_path:str, n_speakers:int)->str:
         " --dataset " + str(uid) + \
         " --reco2num_spk " + reco2num_spk
 
-    res = "exp/xvectors_" + str(uid) + "_cmn_segmented/plda_scores_speakers_supervised/rttm"
+    rttm_path = "exp/xvectors_" + str(uid) + "_cmn_segmented/plda_scores_speakers_supervised/rttm"
 
     try:
         copyfile(audio_path, process_dir + '/' + str(uid) + '.wav')
@@ -40,6 +66,7 @@ def diarize(audio_path:str, n_speakers:int)->str:
     
     os.system(cmd)
     
+    
     try:
         rmtree(process_dir)
         rmtree(process_dir + "_cmn")
@@ -48,7 +75,7 @@ def diarize(audio_path:str, n_speakers:int)->str:
     except IOError as e:
         print("error while deleting folder %s", e)
 
-    return(res)
+    return(rttm2json(rttm_path))
 
 
 if __name__ == "__main__":
