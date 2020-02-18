@@ -1,0 +1,14 @@
+syntax = 'proto3';
+
+message Input{
+    string audio_path = 1;
+    int32 n_speakers = 2;
+}
+
+message Output{
+    string file_path = 1;
+}
+
+service Diarize{
+    rpc diarize_from_wav(Input) returns (Output){}
+}
