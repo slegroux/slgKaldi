@@ -24,7 +24,7 @@ if [ $stage -eq -1 ]; then
 fi
 
 # data preprocessing
-if [ $stage -eq 0 ]; then
+if [ $stage -le 0 ]; then
     model_sr=8000
     ./local/make_kaldi_dir.sh $audio_dir --model_sr $model_sr --dataset $dataset
     ./utils/fix_data_dir.sh data/$dataset
@@ -43,7 +43,7 @@ else
 fi
 
 # mfcc
-if [ $stage -eq 1 ]; then
+if [ $stage -le 1 ]; then
     steps/make_mfcc.sh --mfcc-config conf/mfcc.conf --nj $nj \
       --cmd "run.pl" --write-utt2num-frames true \
       data/$dataset exp/make_mfcc $mfccdir
@@ -52,7 +52,7 @@ if [ $stage -eq 1 ]; then
 fi
 
 # vad
-if [ $stage -eq 2 ]; then
+if [ $stage -le 2 ]; then
     sid/compute_vad_decision.sh --nj $nj --cmd "run.pl" \
         --vad-config conf/vad.conf \
         data/$dataset exp/make_vad $vaddir
@@ -60,7 +60,7 @@ if [ $stage -eq 2 ]; then
 fi
 
 # cmn xvectors
-if [ $stage -eq 3 ]; then
+if [ $stage -le 3 ]; then
     ./local/nnet3/xvector/prepare_feats.sh --nj $nj \
         --cmd "run.pl" data/$dataset data/${dataset}_cmn exp/make_xvectors
     cp data/$dataset/vad.scp data/${dataset}_cmn/
@@ -68,21 +68,21 @@ if [ $stage -eq 3 ]; then
 fi
 
 # segment on cmn data
-if [ $stage -eq 4 ]; then
+if [ $stage -le 4 ]; then
     diarization/vad_to_segments.sh --nj $nj --cmd "run.pl" \
     data/${dataset}_cmn data/${dataset}_cmn_segmented
     utils/fix_data_dir.sh data/${dataset}_cmn_segmented
 fi
 
 # xvectors
-if [ $stage -eq 5 ]; then
+if [ $stage -le 5 ]; then
     diarization/nnet3/xvector/extract_xvectors.sh --nj $nj --cmd "run.pl" \
         --window 1.5 --period 0.75 --apply-cmn false --min-segment 0.5 \
         $nnet_dir/xvector_nnet_1a data/${dataset}_cmn_segmented exp/xvectors_${dataset}_cmn_segmented
 fi
 
 # scoring
-if [ $stage -eq 6 ]; then
+if [ $stage -le 6 ]; then
     diarization/nnet3/xvector/score_plda.sh \
         --cmd "run.pl" \
         --target-energy 0.9 --nj $nj $nnet_dir/xvectors_sre_combined/ \
@@ -90,11 +90,12 @@ if [ $stage -eq 6 ]; then
 fi
 
 # supervised clustering
-if [ $stage -eq 7 ]; then
+if [ $stage -le 7 ]; then
     diarization/cluster.sh --cmd "run.pl" --nj $nj \
         --reco2num-spk data/reco2num_spk \
         exp/xvectors_${dataset}_cmn_segmented/plda_scores \
         exp/xvectors_${dataset}_cmn_segmented/plda_scores_speakers_supervised
+    cat exp/xvectors_${dataset}_cmn_segmented/plda_scores_speakers_supervised/rttm
 fi
 
 # eval
