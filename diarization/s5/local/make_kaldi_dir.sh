@@ -1,14 +1,17 @@
 #!/usr/bin/env bash
 # 2020 sylvain.legroux@gmail.com
 
-#set -x
 
-audio_dir=$1
+
+
 model_sr=8000
 dataset=test
 
 . utils/parse_options.sh
 
+audio_dir=$1
+
+set -x
 if [ -f data/$dataset/wav.scp ]; then
     echo "wav.scp already exists, archiving"
     mv data/$dataset/wav.scp data/$dataset/wav.scp.bu

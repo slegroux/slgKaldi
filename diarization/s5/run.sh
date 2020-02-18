@@ -10,12 +10,14 @@ audio_dir=data/audio
 dataset=test
 mfccdir=mfcc
 vaddir=mfcc
+reco2num_spk=reco2num_spk
 nnet_dir=/home/workfit/Sylvain/Data/kaldi_models/0003_sre16_v2_1a/exp
 
 . ./utils/parse_options.sh
 
 np=$(( $(nproc) - 1 ))
-#set -x
+set -x
+#set -euo
 
 
 # link to utils
@@ -26,7 +28,7 @@ fi
 # data preprocessing
 if [ $stage -le 0 ]; then
     model_sr=8000
-    ./local/make_kaldi_dir.sh $audio_dir --model_sr $model_sr --dataset $dataset
+    ./local/make_kaldi_dir.sh --model_sr $model_sr --dataset $dataset $audio_dir
     ./utils/fix_data_dir.sh data/$dataset
 fi
 
@@ -92,7 +94,7 @@ fi
 # supervised clustering
 if [ $stage -le 7 ]; then
     diarization/cluster.sh --cmd "run.pl" --nj $nj \
-        --reco2num-spk data/reco2num_spk \
+        --reco2num-spk data/${dataset}/${reco2num_spk} \
         exp/xvectors_${dataset}_cmn_segmented/plda_scores \
         exp/xvectors_${dataset}_cmn_segmented/plda_scores_speakers_supervised
     cat exp/xvectors_${dataset}_cmn_segmented/plda_scores_speakers_supervised/rttm

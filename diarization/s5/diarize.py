@@ -1,32 +1,36 @@
 #!/usr/bin/env python
+
 import os
 import glob
 import sys
-from shutil import copyfile
+from shutil import copyfile, rmtree
 import uuid
 import argparse
-
+from IPython import embed
 
 def diarize(audio_path:str, n_speakers:int)->str:
-    audio_dir='1file'
-    dataset='1file'
+    
     uid = uuid.uuid4()
-
-    cmd = "./run.sh --stage 0" + \
-        " --audio_dir " + audio_dir + \
-        " --dataset " + dataset
-
-    res = "exp/xvectors_" + dataset + "_cmn_segmented/plda_scores_speakers_supervised/rttm"
-    wavs = glob.glob(audio_dir + '/*.wav')
-    
-    for wav in wavs:
-        try:
-            os.remove(wav)
-        except:
-            print("error while deleting file", wav)
-    
+    process_dir = 'data/' + str(uid)
     try:
-        copyfile(audio_path, audio_dir + '/uid.wav')
+        os.mkdir(process_dir)
+    except IOError as e:
+        print("can't make dir %s" %e)
+        sys.exit(1)
+    reco2num_spk = str(uid) + '.spk'
+    
+    with open(process_dir + "/" + reco2num_spk, 'w') as f:
+        f.write(str(uid) + " " + str(n_speakers) + "\n")
+    
+    cmd = "./run.sh --stage 0" + \
+        " --audio_dir " + process_dir + \
+        " --dataset " + str(uid) + \
+        " --reco2num_spk " + reco2num_spk
+
+    res = "exp/xvectors_" + str(uid) + "_cmn_segmented/plda_scores_speakers_supervised/rttm"
+
+    try:
+        copyfile(audio_path, process_dir + '/' + str(uid) + '.wav')
     except IOError as e:
         print("Unable to copy file. %s" % e)
         sys.exit(1)
@@ -35,8 +39,21 @@ def diarize(audio_path:str, n_speakers:int)->str:
         sys.exit(1)
     
     os.system(cmd)
+    
+    try:
+        rmtree(process_dir)
+        rmtree(process_dir + "_cmn")
+        rmtree(process_dir + "_cmn_segmented")
+        rmtree("exp/xvectors_" + str(uid) + "_cmn_segmented/plda_scores_speakers_supervised")
+    except IOError as e:
+        print("error while deleting folder %s", e)
+
     return(res)
 
 
 if __name__ == "__main__":
-    pass
+    parser = argparse.ArgumentParser(description='diarizer')
+    parser.add_argument('wavfile', type=str)
+    parser.add_argument('nspeakers', type=int)
+    args = parser.parse_args()
+    diarize(args.wavfile, args.nspeakers)
