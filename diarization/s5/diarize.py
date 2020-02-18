@@ -44,7 +44,7 @@ def diarize(audio_path:str, n_speakers:int)->str:
         rmtree(process_dir)
         rmtree(process_dir + "_cmn")
         rmtree(process_dir + "_cmn_segmented")
-        rmtree("exp/xvectors_" + str(uid) + "_cmn_segmented/plda_scores_speakers_supervised")
+        rmtree("exp/xvectors_" + str(uid) + "_cmn_segmented")
     except IOError as e:
         print("error while deleting folder %s", e)
 
