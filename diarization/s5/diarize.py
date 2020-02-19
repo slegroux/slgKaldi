@@ -12,26 +12,26 @@ import csv
 import json
 
 
-def rttm2json(rttm_path:Path)->str:
+def rttm2json(rttm_path:Path):
 
     diarized = {'num_speakers': None, 'segments': None}
     output = {'request_id': None, 'response': None}
     segments = []
     unique_spk = set()
+    uid = rttm_path[13:13+36]
 
     with Path(rttm_path).open() as f:
-        csv_reader = csv.reader(f, delimiter=' ')    
-        for row in csv_reader:
+        for row in f:
             segment = {'speaker_id': None, 'start': None, 'end': None}
-            segment['start'] = float(row[3])
-            segment['end'] = segment['start'] + float(row[4])
-            segment['speaker_id'] = row[7]
+            segment['start'] = float(row.split()[3])
+            segment['end'] = segment['start'] + float(row.split()[4])
+            segment['speaker_id'] = row.split()[7]
             unique_spk.add(segment['speaker_id'])
             segments.append(segment)
     
     diarized = {'num_speakers': len(unique_spk), 'segments': segments}
-    output = {'request_id': Path(rttm_path).stem, 'response': diarized}
-    return(json.dumps(output))
+    output = {'request_id': uid, 'response': diarized}
+    return(json.dumps(output, indent=2))
 
 
 def diarize(audio_path:str, n_speakers:int)->str:
@@ -66,6 +66,7 @@ def diarize(audio_path:str, n_speakers:int)->str:
     
     os.system(cmd)
     
+    res = rttm2json(rttm_path)
     
     try:
         rmtree(process_dir)
@@ -74,12 +75,12 @@ def diarize(audio_path:str, n_speakers:int)->str:
         rmtree("exp/xvectors_" + str(uid) + "_cmn_segmented")
     except IOError as e:
         print("error while deleting folder %s", e)
-
-    return(rttm2json(rttm_path))
+    
+    return(res)
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='diarizer')
+    parser = argparse.ArgumentParser(description='diarization server')
     parser.add_argument('wavfile', type=str)
     parser.add_argument('nspeakers', type=int)
     args = parser.parse_args()

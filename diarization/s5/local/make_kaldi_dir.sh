@@ -2,8 +2,6 @@
 # 2020 sylvain.legroux@gmail.com
 
 
-
-
 model_sr=8000
 dataset=test
 
@@ -11,7 +9,7 @@ dataset=test
 
 audio_dir=$1
 
-set -x
+#set -x
 if [ -f data/$dataset/wav.scp ]; then
     echo "wav.scp already exists, archiving"
     mv data/$dataset/wav.scp data/$dataset/wav.scp.bu

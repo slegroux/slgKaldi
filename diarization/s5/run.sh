@@ -16,7 +16,7 @@ nnet_dir=/home/workfit/Sylvain/Data/kaldi_models/0003_sre16_v2_1a/exp
 . ./utils/parse_options.sh
 
 np=$(( $(nproc) - 1 ))
-set -x
+#set -x
 #set -euo
 
 
