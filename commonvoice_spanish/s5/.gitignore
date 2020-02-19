@@ -2,7 +2,7 @@ exp/
 data/
 data.bu/
 mfcc/
-local/
+#local/
 mfcc_aug/
 diarization
 report/
