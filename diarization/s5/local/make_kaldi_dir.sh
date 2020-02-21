@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # 2020 sylvain.legroux@gmail.com
 
-
 model_sr=8000
 dataset=test
 
@@ -9,7 +8,7 @@ dataset=test
 
 audio_dir=$1
 
-#set -x
+set -x
 if [ -f data/$dataset/wav.scp ]; then
     echo "wav.scp already exists, archiving"
     mv data/$dataset/wav.scp data/$dataset/wav.scp.bu
@@ -18,6 +17,10 @@ fi
 if [ -f data/$dataset/utt2spk ]; then
     echo "utt2spk already exists, archiving"
     mv data/$dataset/utt2spk data/$dataset/utt2spk.bu
+fi
+
+if [ ! -d data/$dataset ]; then
+    mkdir -p data/$dataset
 fi
 
 for i in $audio_dir/*.wav; do
@@ -30,4 +33,3 @@ for i in $audio_dir/*.wav; do
     echo $id $path >> data/$dataset/wav.scp
     echo $id $id >> data/$dataset/utt2spk
 done
-
