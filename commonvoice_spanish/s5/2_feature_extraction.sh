@@ -21,8 +21,8 @@ if [ $stage == 5 ]; then
     if [ -e data/$x/cmvn.scp ]; then
       rm data/$x/cmvn.scp
     fi
-    steps/make_mfcc.sh --mfcc-config conf/mfcc.conf --nj $njobs data/$x exp/mfcc/$x $mfccdir || exit 1;
-    steps/compute_cmvn_stats.sh data/$x exp/mfcc/$x $mfccdir || exit 1;
+    steps/make_mfcc.sh --mfcc-config conf/mfcc.conf --nj $njobs data/$x
+    steps/compute_cmvn_stats.sh data/$x
     utils/fix_data_dir.sh data/$x
     utils/validate_data_dir.sh data/$x
   done

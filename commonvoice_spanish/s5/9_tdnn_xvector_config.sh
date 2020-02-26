@@ -1,14 +1,16 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Set -e here so that we catch if any executable fails immediately
 set -euo pipefail
 
 stage=13
 nnet3_affix=_online_cmn
-affix=64k
+affix=_xvector
 tree_affix=
-
 xent_regularize=0.1
+
+dir=exp/chain${nnet3_affix}/tdnn${affix}
+tree_dir=exp/chain${nnet3_affix}/tree
 
 echo "$0 $@"  # Print the command line for logging
 
@@ -16,16 +18,6 @@ echo "$0 $@"  # Print the command line for logging
 . ./path.sh
 . ./utils/parse_options.sh
 
-if ! cuda-compiled; then
-  cat <<EOF && exit 1
-This script is intended to be used with GPUs but you have not compiled Kaldi with CUDA
-If you want to use GPUs (and have them), go to src/, and configure and make on a machine
-where "nvcc" is installed.
-EOF
-fi
-
-dir=exp/chain${nnet3_affix}/tdnn${affix}_sp
-tree_dir=exp/chain${nnet3_affix}/tree_sp${tree_affix:+_$tree_affix}
 
 if [ $stage -le 13 ]; then
   mkdir -p $dir

@@ -1,20 +1,21 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Set -e here so that we catch if any executable fails immediately
 set -euo pipefail
-set -x
+
 
 stage=14
 
 gmm=tri3b
 nnet3_affix=_online_cmn
-affix=f_ivec_specaug
+# affix=f_ivec_specaug
 #affix=1a76b #cnntdnn
+affix=_xvector
 tree_affix=
-train_set=train
+train_set=test
 
 train_stage=-10
-num_epochs=250
+num_epochs=5
 
 srand=0
 chunk_width=140,100,160
@@ -24,7 +25,7 @@ common_egs_dir=
 remove_egs=false
 reporting_email=
 online_cmvn=true
-
+n_gpu=8
 
 echo "$0 $@"  # Print the command line for logging
 
@@ -40,11 +41,17 @@ where "nvcc" is installed.
 EOF
 fi
 
-dir=exp/chain${nnet3_affix}/tdnn${affix}_sp
-tree_dir=exp/chain${nnet3_affix}/tree_sp${tree_affix:+_$tree_affix}
-train_ivector_dir=exp/nnet3${nnet3_affix}/ivectors_${train_set}_sp_hires
-train_data_dir=data/${train_set}_sp_hires
-lat_dir=exp/chain${nnet3_affix}/${gmm}_${train_set}_sp_lats
+set -x
+
+dir=exp/chain${nnet3_affix}/tdnn${affix}
+tree_dir=exp/chain${nnet3_affix}/tree
+#train_ivector_dir=exp/nnet3${nnet3_affix}/ivectors_${train_set}_sp_hires
+#train_data_dir=data/${train_set}_sp_hires
+#train_ivector_dir=data/${train_set}_hires/ivectors
+train_ivector_dir=data/${train_set}_x/xivectors
+train_data_dir=data/${train_set}_hires
+#lat_dir=exp/chain${nnet3_affix}/${gmm}_${train_set}_sp_lats
+lat_dir=data/${train_set}/${gmm}_lats
 
 # sudo nvidia-smi -c 3
 
@@ -64,8 +71,8 @@ if [ $stage -le 14 ]; then
     --trainer.max-param-change=2.0 \
     --trainer.num-epochs=$num_epochs \
     --trainer.frames-per-iter=3000000 \
-    --trainer.optimization.num-jobs-initial=2 \
-    --trainer.optimization.num-jobs-final=8 \
+    --trainer.optimization.num-jobs-initial=$n_gpu \
+    --trainer.optimization.num-jobs-final=$n_gpu \
     --trainer.optimization.initial-effective-lrate=0.002 \
     --trainer.optimization.final-effective-lrate=0.0002 \
     --trainer.num-chunk-per-minibatch=128,64 \

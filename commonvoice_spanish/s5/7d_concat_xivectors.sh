@@ -27,7 +27,10 @@ xivector_dir=$3
 
 if [ $stage -le 0 ]; then
     # append to ivectors
-    mkdir -p $xivector_dir
+    if [ ! -d $xivector_dir ]; then
+      mkdir -p $xivector_dir
+    fi
+    
     cp $ivector_dir/ivector_period $xivector_dir
     
     append-vector-to-feats scp:$ivector_dir/ivector_online.scp \
