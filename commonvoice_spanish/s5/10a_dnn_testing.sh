@@ -1,4 +1,5 @@
 #!/bin/bash
+# 2020 slegroux@ccrma.stanford.edu
 
 # Set -e here so that we catch if any executable fails immediately
 set -euo pipefail
@@ -8,7 +9,7 @@ stage=16
 
 gmm=tri3b
 nnet3_affix=_online_cmn
-affix=f_ivec_specaug
+affix=_xvector
 tree_affix=
 chunk_width=140,100,160
 
@@ -60,7 +61,7 @@ if [ $stage -le 16 ]; then
   fi
   if [ ! -d exp/nnet3${nnet3_affix}/ivectors_${test_set}_hires ]; then
     echo "compute dataset hires ivecs"
-    ./7a_ivector_testing.sh --test_set ${test_set}
+    ./7a_ivector_extract.sh --test_set ${test_set}
   fi
   steps/nnet3/decode.sh \
       --acwt 1.0 --post-decode-acwt 10.0 \

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# 2020 slegroux@ccrma.stanford.edu
 
 njobs=$(($(nproc)-1))
 stage=6

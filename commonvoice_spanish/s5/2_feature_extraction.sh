@@ -1,4 +1,5 @@
 #!/bin/bash
+# 2020 slegroux@ccrma.stanford
 
 njobs=$(($(nproc)-1))
 stage=5

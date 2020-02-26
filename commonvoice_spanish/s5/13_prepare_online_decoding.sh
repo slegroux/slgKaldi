@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# 2020 slegroux@ccrma.stanford.edu
 
 mfcc_conf=conf/mfcc_hires.conf
 cmvn_conf=conf/online_cmvn.conf

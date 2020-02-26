@@ -1,4 +1,5 @@
 #!/bin/bash
+# 2020 slegroux@ccrma.stanford.edu
 
 njobs=$(($(nproc)-1))
 test_set=test_35

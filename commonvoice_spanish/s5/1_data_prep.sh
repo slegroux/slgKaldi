@@ -1,4 +1,5 @@
 #!/bin/bash
+# 2020 slegroux@ccrma.stanford.edu
 
 . ./cmd.sh
 . ./path.sh
