@@ -8,7 +8,8 @@ stage=16
 
 gmm=tri3b
 nnet3_affix=_online_cmn
-affix=_xvector
+train_set=train
+affix=_xvector_${train_set}
 tree_affix=
 chunk_width=140,100,160
 
@@ -34,8 +35,8 @@ n_speakers_test=$(cat data/${test_set}_hires/spk2utt | wc -l)
 # nspk=$(wc -l <data/${dataset}_hires/spk2utt)
 frames_per_chunk=$(echo $chunk_width | cut -d, -f1)
 
-dir=exp/chain${nnet3_affix}/tdnn${affix}
-tree_dir=exp/chain${nnet3_affix}/tree
+dir=exp/chain${nnet3_affix}/tdnn_${train_set}
+tree_dir=exp/chain${nnet3_affix}/tree_${train_set}
 
 if [ $njobs -le $n_speakers_test ]; then
   nj=$njobs

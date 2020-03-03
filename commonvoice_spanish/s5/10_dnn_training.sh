@@ -11,9 +11,9 @@ gmm=tri3b
 nnet3_affix=_online_cmn
 # affix=f_ivec_specaug
 #affix=1a76b #cnntdnn
-affix=_xvector
+train_set=train
+affix=_xvector_${train_set}
 tree_affix=
-train_set=test
 
 train_stage=-10
 num_epochs=5
@@ -45,7 +45,7 @@ fi
 set -x
 
 dir=exp/chain${nnet3_affix}/tdnn${affix}
-tree_dir=exp/chain${nnet3_affix}/tree
+tree_dir=exp/chain${nnet3_affix}/tree_${train_set}
 #train_ivector_dir=exp/nnet3${nnet3_affix}/ivectors_${train_set}_sp_hires
 #train_data_dir=data/${train_set}_sp_hires
 #train_ivector_dir=data/${train_set}_hires/ivectors

@@ -5,7 +5,7 @@
 set -euo pipefail
 njobs=$(($(nproc)-1))
 stage=10
-train_set=test
+train_set=train
 gmm=tri3b
 nnet3_affix=_online_cmn
 
@@ -24,7 +24,7 @@ fi
 
 gmm_dir=exp/$gmm
 ali_dir=data/${train_set}/${gmm}_ali
-tree_dir=exp/chain${nnet3_affix}/tree
+tree_dir=exp/chain${nnet3_affix}/tree_${train_set}
 lang=data/lang_chain
 lat_dir=data/${train_set}/${gmm}_lats
 train_data_dir=data/${train_set}_hires

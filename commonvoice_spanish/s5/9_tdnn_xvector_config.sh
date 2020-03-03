@@ -6,12 +6,13 @@ set -euo pipefail
 
 stage=13
 nnet3_affix=_online_cmn
-affix=_xvector
 tree_affix=
 xent_regularize=0.1
+train_set=train
+affix=_xvector_${train_set}
 
 dir=exp/chain${nnet3_affix}/tdnn${affix}
-tree_dir=exp/chain${nnet3_affix}/tree
+tree_dir=exp/chain${nnet3_affix}/tree_${train_set}
 
 echo "$0 $@"  # Print the command line for logging
 
