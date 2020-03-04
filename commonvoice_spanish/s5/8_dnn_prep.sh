@@ -7,7 +7,7 @@ njobs=$(($(nproc)-1))
 stage=10
 train_set=train
 gmm=tri3b
-nnet3_affix=_online_cmn
+nnet3_affix=
 
 echo "$0 $@"  # Print the command line for logging
 

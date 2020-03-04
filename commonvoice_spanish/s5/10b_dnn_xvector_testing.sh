@@ -29,13 +29,13 @@ echo "$0 $@"  # Print the command line for logging
 . ./path.sh
 . ./utils/parse_options.sh
 
-set -x
+# set -x
 njobs=$(($(nproc)-1))
 n_speakers_test=$(cat data/${test_set}_hires/spk2utt | wc -l)
 # nspk=$(wc -l <data/${dataset}_hires/spk2utt)
 frames_per_chunk=$(echo $chunk_width | cut -d, -f1)
 
-dir=exp/chain${nnet3_affix}/tdnn_${train_set}
+dir=exp/chain${nnet3_affix}/tdnn${affix}
 tree_dir=exp/chain${nnet3_affix}/tree_${train_set}
 
 if [ $njobs -le $n_speakers_test ]; then
