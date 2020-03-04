@@ -86,12 +86,12 @@ if [ $stage -le 14 ]; then
     --trainer.max-param-change 2.0 \
     --cleanup.remove-egs=$remove_egs \
     --use-gpu=wait \
-    --reporting.email="$reporting_email" \
     --feat-dir=$train_data_dir \
     --tree-dir=$tree_dir \
     --lat-dir=$lat_dir \
     --dir=$dir  || exit 1;
 
     # --trainer.srand=$srand \
+    #--reporting.email="$reporting_email" \
 
 fi
