@@ -109,7 +109,6 @@ if [ $stage -le 5 ]; then
      exp/nnet3${nnet3_affix}/extractor || exit 1;
 fi
 
-
 if [ $stage -le 6 ]; then
   # We extract iVectors on the speed-perturbed training data after combining
   # short segments, which will be what we train the system on.  With

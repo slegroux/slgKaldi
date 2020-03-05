@@ -4,7 +4,6 @@
 # Set -e here so that we catch if any executable fails immediately
 set -euo pipefail
 
-
 stage=14
 
 gmm=tri3b
@@ -13,15 +12,15 @@ nnet3_affix=
 #affix=1a76b #cnntdnn
 train_set=train
 #affix=_xvector_${train_set}
-affix=
+affix=f_cnn_rdi
 tree_affix=
 
-train_stage=135
-num_epochs=150
+train_stage=-1
+num_epochs=10
 
 srand=0
-#chunk_width=140,100,160
-chunk_width=150,110,100 #tedlium s5_r3
+#chunk_width=150,110,100 #tedlium s5_r3
+chunk_width=140,100,160 #rdi
 xent_regularize=0.1
 dropout_schedule='0,0@0.20,0.5@0.50,0'
 frames_per_iter=5000000
@@ -48,7 +47,7 @@ fi
 
 set -x
 
-dir=exp/chain${nnet3_affix}/tdnn${affix}
+dir=exp/chain${nnet3_affix}/cnn_tdnnf_rdi_sp
 tree_dir=exp/chain${nnet3_affix}/tree_${train_set}
 #train_ivector_dir=exp/nnet3${nnet3_affix}/ivectors_${train_set}_sp_hires
 #train_data_dir=data/${train_set}_sp_hires
@@ -63,15 +62,15 @@ lat_dir=data/${train_set}/${gmm}_lats
 if [ $stage -le 14 ]; then
  
   steps/nnet3/chain/train.py --stage=$train_stage \
-    --cmd="$decode_cmd" \
+    --cmd="run.pl" \
     --feat.online-ivector-dir=$train_ivector_dir \
-    --feat.cmvn-opts="--config=conf/online_cmvn.conf" \
+    --feat.cmvn-opts="--norm-means=false --norm-vars=false" \
     --chain.xent-regularize $xent_regularize \
     --chain.leaky-hmm-coefficient=0.1 \
     --chain.l2-regularize=0.0 \
     --chain.apply-deriv-weights false \
     --chain.lm-opts="--num-extra-lm-states=2000" \
-    --trainer.dropout-schedule $dropout_schedule \    
+    --trainer.dropout-schedule $dropout_schedule \
     --trainer.add-option="--optimization.memory-compression-level=2" \
     --egs.dir="$common_egs_dir" \
     --egs.opts="--frames-overlap-per-eg 0 --constrained false --online-cmvn $online_cmvn" \
@@ -93,5 +92,5 @@ if [ $stage -le 14 ]; then
 
     # --trainer.srand=$srand \
     #--reporting.email="$reporting_email" \
-
+    # --feat.cmvn-opts="--config=conf/online_cmvn.conf" \
 fi
