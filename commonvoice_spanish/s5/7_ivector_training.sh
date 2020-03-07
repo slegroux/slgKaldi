@@ -6,8 +6,7 @@ set -euo pipefail
 
 
 gmm=tri3b
-online_cmvn_iextractor=true
-nnet3_affix=_online_cmn
+online_cmvn_iextractor=false
 train_set=train
 stage=0
 
@@ -35,4 +34,4 @@ fi
 # hires
 ./local/make_mfcc_hires.sh ${train_set}_sp_vp
 
-./local/train_ivector.sh --gmm $gmm ${train_set}
+./local/train_ivector.sh --gmm $gmm --online_cmvn_iextractor $online_cmvn_iextractor ${train_set}

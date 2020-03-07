@@ -7,8 +7,6 @@ gmm=tri3b
 . ./path.sh
 . utils/parse_options.sh
 
-
-
 dataset=$1
 
 gmm_dir=exp/${gmm}
@@ -20,7 +18,6 @@ for f in ${gmm_dir}/final.mdl; do
     exit 1
   fi
 done
-
 
 njobs=$(($(nproc)-1))
 n_speakers_test=$(cat data/${dataset}/spk2utt| wc -l)

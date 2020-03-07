@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # 2020 slegroux@ccrma.stanford.edu
+# train on hires data
 
 # Set -e here so that we catch if any executable fails immediately
 set -euo pipefail
@@ -7,20 +8,16 @@ set -euo pipefail
 stage=14
 
 gmm=tri3b
-nnet3_affix=
-# affix=f_ivec_specaug
-#affix=1a76b #cnntdnn
-train_set=train
-#affix=_xvector_${train_set}
-affix=f_cnn_rdi
-tree_affix=
 
-train_stage=-1
+train_set=train35
+dir=exp/chain/tdnnf_tedlium_train35
+
+train_stage=-10
 num_epochs=10
 
 srand=0
-#chunk_width=150,110,100 #tedlium s5_r3
-chunk_width=140,100,160 #rdi
+chunk_width=150,110,100 #tedlium s5_r3
+# chunk_width=140,100,160 #rdi
 xent_regularize=0.1
 dropout_schedule='0,0@0.20,0.5@0.50,0'
 frames_per_iter=5000000
@@ -28,7 +25,7 @@ frames_per_iter=5000000
 common_egs_dir=
 remove_egs=false
 reporting_email=
-online_cmvn=true
+online_cmvn=false
 n_gpu=8
 
 echo "$0 $@"  # Print the command line for logging
@@ -47,13 +44,12 @@ fi
 
 set -x
 
-dir=exp/chain${nnet3_affix}/cnn_tdnnf_rdi_sp
-tree_dir=exp/chain${nnet3_affix}/tree_${train_set}
-#train_ivector_dir=exp/nnet3${nnet3_affix}/ivectors_${train_set}_sp_hires
+tree_dir=exp/chain/tree_${train_set}
+#train_ivector_dir=exp/nnet3_online_cmn/ivectors_${train_set}_sp_hires
 #train_data_dir=data/${train_set}_sp_hires
-#train_ivector_dir=data/${train_set}_hires/ivectors
-train_ivector_dir=data/${train_set}_x/xivectors
+#train_ivector_dir=data/${train_set}_x/xivectors
 train_data_dir=data/${train_set}_hires
+train_ivector_dir=${train_data_dir}/ivectors
 #lat_dir=exp/chain${nnet3_affix}/${gmm}_${train_set}_sp_lats
 lat_dir=data/${train_set}/${gmm}_lats
 
@@ -79,7 +75,7 @@ if [ $stage -le 14 ]; then
     --trainer.frames-per-iter=$frames_per_iter \
     --trainer.num-epochs=$num_epochs \
     --trainer.optimization.num-jobs-initial=$n_gpu \
-    --trainer.optimization.num-jobs-final=$n_gpu \
+    --trainer.optimization.num-jobs-final=1 \
     --trainer.optimization.initial-effective-lrate=0.00025 \
     --trainer.optimization.final-effective-lrate=0.000025 \
     --trainer.max-param-change 2.0 \
@@ -93,4 +89,5 @@ if [ $stage -le 14 ]; then
     # --trainer.srand=$srand \
     #--reporting.email="$reporting_email" \
     # --feat.cmvn-opts="--config=conf/online_cmvn.conf" \
+  
 fi

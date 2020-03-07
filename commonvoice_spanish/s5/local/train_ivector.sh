@@ -8,7 +8,7 @@ set -euo pipefail
 # iVector-related parts of the script.  See those scripts for examples
 # of usage.
 
-stage=0
+stage=4
 
 gmm=tri3b
 online_cmvn_iextractor=false
@@ -28,8 +28,6 @@ for f in data/${train_set}/feats.scp ${gmm_dir}/final.mdl; do
     exit 1
   fi
 done
-
-
 
 
 if [ $stage -le 4 ]; then
@@ -77,7 +75,7 @@ if [ $stage -le 5 ]; then
     --online-cmvn-iextractor $online_cmvn_iextractor \
     data/${train_set}_sp_vp_hires exp/nnet3${nnet3_affix}/diag_ubm \
     exp/nnet3${nnet3_affix}/extractor || exit 1;
-    #  --num-threads 4 --num-processes 2 \
+  #  --num-threads 4 --num-processes 2 \
 fi
 
 if [ $stage -le 6 ]; then
@@ -91,7 +89,8 @@ if [ $stage -le 6 ]; then
   # that's the data we extract the ivectors from, as it's still going to be
   # valid for the non-'max2' data, the utterance list is the same.
 
-  ivectordir=exp/nnet3${nnet3_affix}/ivectors_${train_set}_sp_vp_hires
+  # ivectordir=exp/nnet3${nnet3_affix}/ivectors_${train_set}_sp_vp_hires
+  ivectordir=data/${train_set}_sp_vp_hires/ivectors
  
   # having a larger number of speakers is helpful for generalization, and to
   # handle per-utterance decoding well (iVector starts at zero).
@@ -102,7 +101,14 @@ if [ $stage -le 6 ]; then
 fi
 
 if [ $stage -le 7 ]; then
-  steps/online/nnet2/extract_ivectors_online.sh --cmd "$train_cmd" --nj $nj \
+  njobs=$(($(nproc)-1))
+  n_speakers_test=$(cat ${temp_data_root}/${train_set}_sp_vp_hires_max2/spk2utt| wc -l)
+  if [ $njobs -le $n_speakers_test ]; then
+    nj=$njobs
+  else
+    nj=$n_speakers_test
+  fi
+  steps/online/nnet2/extract_ivectors_online.sh --cmd "$train_cmd" --nj 40 \
     ${temp_data_root}/${train_set}_sp_vp_hires_max2 \
     exp/nnet3${nnet3_affix}/extractor $ivectordir
 

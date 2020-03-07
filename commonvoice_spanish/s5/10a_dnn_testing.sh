@@ -8,22 +8,18 @@ set -euo pipefail
 stage=16
 
 gmm=tri3b
-nnet3_affix=_online_cmn
-train_set=train
-affix=_xvector_${train_set}
-tree_affix=
-chunk_width=140,100,160
-
+dir=exp/chain/tdnnf_tedlium_train
+tree_dir=exp/chain/tree_train
+ivector_extractor=exp/nnet3_train/extractor
+# test_set=test35
 lang=data/lang_test
 
-test_set=test_35
-test_online_decoding=true
-
-online_cmvn=true #tdnn
-#online_cmvn=false #cnn-tdnn
+#online_cmvn=true #tdnn
+online_cmvn=false #cnn-tdnn
+# chunk_width=140,100,160
+chunk_width=150,110,100 #tedlium
 
 compute_graph=true
-
 
 echo "$0 $@"  # Print the command line for logging
 
@@ -31,13 +27,15 @@ echo "$0 $@"  # Print the command line for logging
 . ./path.sh
 . ./utils/parse_options.sh
 
+test_set=$1
+
 njobs=$(($(nproc)-1))
-n_speakers_test=$(cat data/${test_set}_hires/spk2utt | wc -l)
-# nspk=$(wc -l <data/${dataset}_hires/spk2utt)
+n_speakers_test=$(cat data/${test_set}/spk2utt | wc -l)
+
 frames_per_chunk=$(echo $chunk_width | cut -d, -f1)
 
-dir=exp/chain${nnet3_affix}/tdnn${affix}
-tree_dir=exp/chain${nnet3_affix}/tree_${train_set}
+ivector_dir=data/${test_set}_hires/ivectors
+#ivector_dir=exp/nnet3_test35/
 
 if [ $njobs -le $n_speakers_test ]; then
   nj=$njobs
@@ -60,15 +58,17 @@ if [ $stage -le 16 ]; then
   else  
     nj=$n_speakers_test
   fi
-  if [ ! -d exp/nnet3${nnet3_affix}/ivectors_${test_set}_hires ]; then
+
+  set -x
+  if [ ! -d $ivector_dir ]; then
     echo "compute dataset hires ivecs"
-    ./7a_ivector_extract.sh --test_set ${test_set}
+    ./7a_ivector_extract.sh --ivector_extractor $ivector_extractor ${test_set}
   fi
   steps/nnet3/decode.sh \
       --acwt 1.0 --post-decode-acwt 10.0 \
       --frames-per-chunk $frames_per_chunk \
       --nj $nj --cmd "run.pl" \
-      --online-ivector-dir exp/nnet3${nnet3_affix}/ivectors_${test_set}_hires \
+      --online-ivector-dir $ivector_dir \
       $tree_dir/graph_tgsmall data/${test_set}_hires ${dir}/decode_tgsmall_${test_set} || exit 1
   
   echo "TDNN Decoding" | tee -a WER.txt
@@ -84,7 +84,6 @@ if [$stage -le 17 ]; then
   
   echo "large lm rescoring" | tee -a WER.txt
   for x in ${dir}/decode_tglarge_${data}; do [ -d $x ] && grep WER $x/wer_* | utils/best_wer.sh; done | tee -a WER.txt
-
 fi
 
 # Not testing the 'looped' decoding separately, because for
