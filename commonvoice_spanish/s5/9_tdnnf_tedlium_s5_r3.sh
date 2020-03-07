@@ -5,10 +5,11 @@
 set -euo pipefail
 
 stage=13
-nnet3_affix=_online_cmn
-affix=f_tedlium
-suffix=
+
 xent_regularize=0.1
+
+dir=exp/chain/tdnnf_tedlium_train
+tree_dir=exp/chain/tree_train
 
 echo "$0 $@"  # Print the command line for logging
 
@@ -16,9 +17,6 @@ echo "$0 $@"  # Print the command line for logging
 . ./path.sh
 . ./utils/parse_options.sh
 
-
-dir=exp/chain${nnet3_affix}/tdnn${affix}_${train_set}_${suffix}
-tree_dir=exp/chain${nnet3_affix}/tree_${train_set}
 
 if [ $stage -le 13 ]; then
   mkdir -p $dir

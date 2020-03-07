@@ -7,8 +7,7 @@ set -euo pipefail
 njobs=$(($(nproc)-1))
 
 stage=0
-nnet3_affix=_online_cmn
-ivector_extractor=exp/nnet3${nnet3_affix}/extractor
+ivector_extractor=exp/nnet3_train/extractor
 
 echo "$0 $@"  # Print the command line for logging
 
