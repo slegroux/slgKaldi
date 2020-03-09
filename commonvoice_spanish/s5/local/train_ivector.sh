@@ -18,7 +18,7 @@ online_cmvn_iextractor=false
 . utils/parse_options.sh
 
 train_set=$1
-nnet3_affix=_${train_set}
+nnet3_affix=_${train_set}_sp_vp
 gmm_dir=exp/${gmm}
 ali_dir=data/${train_set}_sp/${gmm}_ali
 

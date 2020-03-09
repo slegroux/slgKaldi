@@ -53,11 +53,6 @@ fi
 
 if [ $stage -le 16 ]; then
   #Decoder
-  if [ $njobs -le $n_speakers_test ]; then
-    nj=$njobs
-  else  
-    nj=$n_speakers_test
-  fi
 
   set -x
   if [ ! -d $ivector_dir ]; then

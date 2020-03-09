@@ -6,6 +6,8 @@ set -euo pipefail
 njobs=$(($(nproc)-1))
 stage=10
 train_set=train
+train_ivector_dir=data/${train_set}_hires/ivectors
+train_data_dir=data/${train_set}_hires
 gmm=tri3b
 
 echo "$0 $@"  # Print the command line for logging
@@ -27,9 +29,7 @@ tree_dir=exp/chain/tree_${train_set}
 lang=data/lang_chain
 
 lat_dir=data/${train_set}/${gmm}_lats
-train_data_dir=data/${train_set}_hires
 lores_train_data_dir=data/${train_set}
-train_ivector_dir=data/${train_set}_hires/ivectors
 
 
 if [ ! -f $ali_dir/ali.1.gz ]; then

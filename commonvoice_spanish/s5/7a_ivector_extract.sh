@@ -4,8 +4,6 @@
 # Set -e here so that we catch if any executable fails immediately
 set -euo pipefail
 
-njobs=$(($(nproc)-1))
-
 stage=0
 ivector_extractor=exp/nnet3_train/extractor
 
@@ -18,6 +16,7 @@ echo "$0 $@"  # Print the command line for logging
 dataset=$1
 ivector_dir=data/${dataset}_hires/ivectors
 n_speakers_test=$(cat data/${dataset}/spk2utt| wc -l)
+njobs=$(($(nproc)-1))
 
 if [ $njobs -le $n_speakers_test ]; then
   nj=$njobs
@@ -34,8 +33,7 @@ if [ $stage -le 0 ]; then
   utils/fix_data_dir.sh data/${dataset}_hires
 fi
 
-
 if [ $stage -le 1 ]; then
-  steps/online/nnet2/extract_ivectors_online.sh --cmd "run.pl" --nj 40 \
+  steps/online/nnet2/extract_ivectors_online.sh --cmd "run.pl" --nj 35 \
     data/${dataset}_hires $ivector_extractor $ivector_dir
 fi
