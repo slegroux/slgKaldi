@@ -5,9 +5,9 @@
 set -euo pipefail
 njobs=$(($(nproc)-1))
 stage=10
-train_set=train
-train_ivector_dir=data/${train_set}_hires/ivectors
-train_data_dir=data/${train_set}_hires
+train_set=train_sp
+train_ivector_dir=data/${train_set}_vp_hires/ivectors
+
 gmm=tri3b
 
 echo "$0 $@"  # Print the command line for logging
@@ -24,12 +24,11 @@ else
 fi
 
 gmm_dir=exp/$gmm
+lores_train_data_dir=data/${train_set}
 ali_dir=data/${train_set}/${gmm}_ali
 tree_dir=exp/chain/tree_${train_set}
 lang=data/lang_chain
-
 lat_dir=data/${train_set}/${gmm}_lats
-lores_train_data_dir=data/${train_set}
 
 
 if [ ! -f $ali_dir/ali.1.gz ]; then
@@ -37,7 +36,7 @@ if [ ! -f $ali_dir/ali.1.gz ]; then
     data/${train_set} data/lang $gmm_dir $ali_dir || exit 1
 fi
 
-for f in $gmm_dir/final.mdl $train_data_dir/feats.scp $train_ivector_dir/ivector_online.scp \
+for f in $gmm_dir/final.mdl $train_ivector_dir/ivector_online.scp \
     $lores_train_data_dir/feats.scp $ali_dir/ali.1.gz; do
   [ ! -f $f ] && echo "$0: expected file $f to exist" && exit 1
 done
