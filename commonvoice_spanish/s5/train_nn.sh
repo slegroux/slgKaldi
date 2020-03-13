@@ -22,6 +22,8 @@ graph=exp/chain/tree_train_sp/graph_tgsmall
 . path.sh
 . utils/parse_options.sh 
 
+
+
 # train ivectors
 if [ $stage -le 0 ]; then
     ./7_ivector_training.sh --train_set ${train_set}
@@ -72,7 +74,7 @@ if [ $stage -eq 113 ]; then
 fi
 
 if [ $stage -eq 114 ]; then
-    ./13_prepare_online_decoding.sh --stage 1 --model $model_dir --online_model ${model_dir}_online \
+    ./13_prepare_online_decoding.sh --stage 0 --model $model_dir_xvec --online_model ${model_dir_xvec}_online \
         --extractor $ivector_extractor --graph $graph --test_set $test_set
 
 fi
