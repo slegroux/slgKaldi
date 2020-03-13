@@ -49,3 +49,4 @@ if [ $stage -le 1 ]; then
         $xvector_extractor data/${dataset}_x $xvector_dir
 fi
 
+sudo nvidia-smi -c 3

@@ -9,11 +9,21 @@ stage=14
 
 gmm=tri3b
 
-train_set=train35
-dir=exp/chain/tdnnf_tedlium_train35
+train_set=
+dir=
+tree_dir=
+lat_dir=
+train_data_dir=
+train_ivector_dir=
+# train_set=
+# dir=exp/chain/tdnnf_tedlium_train35
+# tree_dir=exp/chain/tree_${train_set}
+# lat_dir=data/${train_set}/${gmm}_lats
+# train_data_dir=data/${train_set}_hires
+# train_ivector_dir=${train_data_dir}/ivectors
 
 train_stage=-10
-num_epochs=10
+num_epochs=100
 
 srand=0
 chunk_width=150,110,100 #tedlium s5_r3
@@ -30,9 +40,9 @@ n_gpu=8
 
 echo "$0 $@"  # Print the command line for logging
 
-. ./cmd.sh
-. ./path.sh
-. ./utils/parse_options.sh
+. cmd.sh
+. path.sh
+. utils/parse_options.sh
 
 if ! cuda-compiled; then
   cat <<EOF && exit 1
@@ -43,15 +53,14 @@ EOF
 fi
 
 set -x
+train_data_dir=data/${train_set}_hires
 
-tree_dir=exp/chain/tree_${train_set}
 #train_ivector_dir=exp/nnet3_online_cmn/ivectors_${train_set}_sp_hires
 #train_data_dir=data/${train_set}_sp_hires
 #train_ivector_dir=data/${train_set}_x/xivectors
-train_data_dir=data/${train_set}_hires
-train_ivector_dir=${train_data_dir}/ivectors
+
 #lat_dir=exp/chain${nnet3_affix}/${gmm}_${train_set}_sp_lats
-lat_dir=data/${train_set}/${gmm}_lats
+
 
 # sudo nvidia-smi -c 3
 
@@ -75,7 +84,7 @@ if [ $stage -le 14 ]; then
     --trainer.frames-per-iter=$frames_per_iter \
     --trainer.num-epochs=$num_epochs \
     --trainer.optimization.num-jobs-initial=$n_gpu \
-    --trainer.optimization.num-jobs-final=1 \
+    --trainer.optimization.num-jobs-final=$n_gpu \
     --trainer.optimization.initial-effective-lrate=0.00025 \
     --trainer.optimization.final-effective-lrate=0.000025 \
     --trainer.max-param-change 2.0 \
