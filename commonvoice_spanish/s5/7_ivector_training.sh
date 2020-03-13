@@ -26,7 +26,8 @@ EOF
 fi
 
 # speed perturb
-./local/make_sp.sh --gmm $gmm ${train_set} #includes computation of alignment of sp data
+./local/make_sp.sh --gmm $gmm --make_align true \
+  --make_mfcc true ${train_set} #includes computation of alignment of sp data
 
 # volume perturb
 ./local/make_vp.sh ${train_set}_sp

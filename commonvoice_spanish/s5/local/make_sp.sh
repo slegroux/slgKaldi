@@ -2,6 +2,8 @@
 
 stage=0
 gmm=tri3b
+make_mfcc=false
+make_align=false
 
 . ./cmd.sh
 . ./path.sh
@@ -27,18 +29,23 @@ else
   nj=$n_speakers_test
 fi
 
-if [ $stage -le 1 ]; then
+if [ $stage -le 0 ]; then
   # Although the nnet will be trained by high resolution data, we still have to
   # perturb the normal data to get the alignment _sp stands for speed-perturbed
   echo "$0: preparing directory for low-resolution speed-perturbed data (for alignment)"
   utils/data/perturb_data_dir_speed_3way.sh data/${dataset} data/${dataset}_sp
+  utils/utt2spk_to_spk2utt.pl data/${dataset}/utt2spk > data/${dataset}/spk2utt
+  utils/fix_data_dir.sh data/${dataset}_sp
+fi
+
+if [ "$make_mfcc" == true ]; then
   echo "$0: making MFCC features for low-resolution speed-perturbed data"
   steps/make_mfcc.sh --cmd "$train_cmd" --nj $nj data/${dataset}_sp || exit 1;
   steps/compute_cmvn_stats.sh data/${dataset}_sp || exit 1;
   utils/fix_data_dir.sh data/${dataset}_sp
 fi
 
-if [ $stage -le 2 ]; then
+if [ "$make_align" == true ]; then
   echo "$0: aligning with the perturbed low-resolution data"
   steps/align_fmllr.sh --nj $nj --cmd "$train_cmd" \
     data/${dataset}_sp data/lang $gmm_dir $ali_dir || exit 1
