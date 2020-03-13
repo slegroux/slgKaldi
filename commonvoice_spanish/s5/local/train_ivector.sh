@@ -59,10 +59,10 @@ if [ $stage -le 4 ]; then
   echo "$0: training the diagonal UBM."
   # Use 512 Gaussians in the UBM.
   steps/online/nnet2/train_diag_ubm.sh --cmd "$train_cmd" --nj $nj \
-    --num-frames 700000 \
-    --num-threads 8 \
+    --num-frames 700000 \ 
     ${temp_data_root}/${train_set}_sp_vp_hires_subset 512 \
     exp/nnet3${nnet3_affix}/pca_transform exp/nnet3${nnet3_affix}/diag_ubm
+  #  --num-threads 8 \
 fi
 
 if [ $stage -le 5 ]; then
@@ -70,8 +70,7 @@ if [ $stage -le 5 ]; then
   # can be sensitive to the amount of data.  The script defaults to an iVector dimension of
   # 100.
   echo "$0: training the iVector extractor"
-  steps/online/nnet2/train_ivector_extractor.sh --cmd "$train_cmd" --nj 5 \
-    --num-threads 4 --num-processes 2 \
+  steps/online/nnet2/train_ivector_extractor.sh --cmd "$train_cmd" --nj $nj \
     --online-cmvn-iextractor $online_cmvn_iextractor \
     data/${train_set}_sp_vp_hires exp/nnet3${nnet3_affix}/diag_ubm \
     exp/nnet3${nnet3_affix}/extractor || exit 1;

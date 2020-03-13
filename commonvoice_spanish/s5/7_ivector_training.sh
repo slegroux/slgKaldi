@@ -26,13 +26,23 @@ EOF
 fi
 
 # speed perturb
-./local/make_sp.sh --gmm $gmm --make_align true \
-  --make_mfcc true ${train_set} #includes computation of alignment of sp data
+if [ ! -d ${train_set}_sp ]; then
+  echo "SP + alignment + mfcc"
+  ./local/make_sp.sh --gmm $gmm --make_align true \
+    --make_mfcc true ${train_set} #includes computation of alignment of sp data
+fi
 
 # volume perturb
-./local/make_vp.sh ${train_set}_sp
+if [ ! -d ${train_set}_sp_vp ]; then
+  echo "VP"
+  ./local/make_vp.sh ${train_set}_sp
+fi
 
 # hires
-./local/make_mfcc_hires.sh ${train_set}_sp_vp
+if [ ! -d ${train_set}_sp_vp_hires ]; then
+  echo "HIRES of sp_vp"
+  ./local/make_mfcc_hires.sh ${train_set}_sp_vp
+fi
 
+echo "train ivectors"
 ./local/train_ivector.sh --gmm $gmm --online_cmvn_iextractor $online_cmvn_iextractor ${train_set}
