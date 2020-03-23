@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-stage=0
+stage=1
 
 . ./cmd.sh
 . ./path.sh
@@ -19,12 +19,13 @@ fi
 if [ $stage -le 1 ]; then
   # Create high-resolution MFCC features (with 40 cepstra instead of 13).
   # this shows how you can split across multiple file-systems.
-  echo "$0: creating high-resolution MFCC features"
+  echo "$0: creating high-resolution MFCC features from conf/mfcc_hires.conf"
   
   utils/copy_data_dir.sh data/$dataset data/${dataset}_hires
   steps/make_mfcc.sh --nj $nj --mfcc-config conf/mfcc_hires.conf \
     --cmd "$train_cmd" data/${dataset}_hires || exit 1;
   steps/compute_cmvn_stats.sh data/${dataset}_hires || exit 1;
   utils/fix_data_dir.sh data/${dataset}_hires
+  utils/validate_data_dir.sh data/${dataset}_hires
 
 fi
