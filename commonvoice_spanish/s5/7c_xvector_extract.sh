@@ -9,8 +9,7 @@ njobs=$(($(nproc)-1))
 stage=0
 
 #nnet_dir=$DATA/0003_sre16_v2_1a/exp
-nnet_dir=$DATA/voxceleb/0007_voxceleb_v2_1a/exp
-xvector_extractor=$nnet_dir/xvector_nnet_1a
+xvector_extractor=$DATA/voxceleb/0007_voxceleb_v2_1a/exp/xvector_nnet_1a
 ngpu=8
 
 sudo nvidia-smi -c 0
