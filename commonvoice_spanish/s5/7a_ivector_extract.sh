@@ -34,6 +34,6 @@ if [ $stage -le 0 ]; then
 fi
 
 if [ $stage -le 1 ]; then
-  steps/online/nnet2/extract_ivectors_online.sh --cmd "run.pl" --nj 35 \
+  steps/online/nnet2/extract_ivectors_online.sh --cmd "run.pl" --nj $nj \
     data/${dataset}_hires $ivector_extractor $ivector_dir
 fi
