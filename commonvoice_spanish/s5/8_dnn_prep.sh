@@ -4,9 +4,11 @@
 # Set -e here so that we catch if any executable fails immediately
 set -euo pipefail
 njobs=$(($(nproc)-1))
-stage=10
-train_set=train_sp
-train_ivector_dir=data/${train_set}_vp_hires/ivectors
+stage=7
+train_set=train_combined
+train_ivector=train_sp
+train_ivector_dir=data/${train_ivector}_vp_hires/ivectors
+ivector_extractor=exp/nnet3_train_sp_vp/extractor
 
 gmm=tri3b
 
@@ -16,6 +18,7 @@ echo "$0 $@"  # Print the command line for logging
 . path.sh
 . utils/parse_options.sh
 
+set -x
 n_speakers_test=$(cat data/${train_set}/spk2utt | wc -l)
 if [ $njobs -le $n_speakers_test ]; then
   nj=$njobs
@@ -30,12 +33,28 @@ tree_dir=exp/chain/tree_${train_set}
 lang=data/lang_chain
 lat_dir=data/${train_set}/${gmm}_lats
 
+# if features haven't  been extracted yet, do so
+
+if [ $stage -le 7 ]; then
+  # extract hires mfcc
+  ./local/make_mfcc.sh ${train_set} || exit 1
+fi
+
+if [ $stage -le 8 ]; then
+# extract normal mfcc
+  ./local/make_mfcc_hires.sh ${train_set} || exit 1
+fi
 
 if [ ! -f $ali_dir/ali.1.gz ]; then
   steps/align_fmllr.sh --nj $nj --cmd "$train_cmd" \
     data/${train_set} data/lang $gmm_dir $ali_dir || exit 1
 fi
 
+if [ ! -f $train_ivector_dir/ivector_online.scp ]; then
+  ./7a_ivector_extract.sh --ivector_extractor $ivector_extractor ${train_set} || exit 1
+fi
+
+# check that ivector extractor and gmm models are available
 for f in $gmm_dir/final.mdl $train_ivector_dir/ivector_online.scp \
     $lores_train_data_dir/feats.scp $ali_dir/ali.1.gz; do
   [ ! -f $f ] && echo "$0: expected file $f to exist" && exit 1
