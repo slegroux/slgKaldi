@@ -23,7 +23,7 @@ train_ivector_dir=
 # train_ivector_dir=${train_data_dir}/ivectors
 
 train_stage=-10
-num_epochs=100
+num_epochs=10
 
 srand=0
 chunk_width=150,110,100 #tedlium s5_r3
