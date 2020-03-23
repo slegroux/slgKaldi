@@ -43,33 +43,37 @@ if [ $stage -le 0 ]; then
 fi
 
 if [ $stage -le 1 ]; then
+  # prepare audio & transcripts
   echo "Making lists for building models."
   local/prepare_data.sh --slgasr_dir $slgasr_dir --stage 1 $datadir
 fi
 
 if [ $stage -le 2 ]; then
+  # add special phones, silence, etcl to lexicon
   mkdir -p data/local/dict $tmpdir/dict
   local/prepare_dict.sh
 fi
 
 if [ $stage -le 3 ]; then
+  # prepare lang L.fst
   utils/prepare_lang.sh \
     data/local/dict "<UNK>" \
     data/local/lang data/lang
 fi
 
 if [ $stage -le 4 ]; then
+  # remove punctuation and filter OOVs
   mkdir -p $tmpdir/subs/lm
   local/subs_prepare_data.pl
 fi
 
 if [ $stage -le 5 ]; then
-  echo "point 1"
+  # generate 3g of in_vocabulary text
   local/prepare_lm.sh  $tmpdir/subs/lm/in_vocabulary.txt
 fi
 
 if [ $stage -le 6 ]; then
-  echo "point 2"
+  # generate language model G.fst
   utils/format_lm.sh \
     data/lang data/local/lm/trigram.arpa.gz data/local/dict/lexicon.txt \
     data/lang_test
