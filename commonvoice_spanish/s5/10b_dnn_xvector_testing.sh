@@ -13,6 +13,7 @@ train_set=train
 dir=exp/chain${nnet3_affix}/tdnn_${train_set}
 tree_dir=exp/chain${nnet3_affix}/tree_${train_set}
 ivector_extractor=exp/nnet3_${train_set}/extractor
+xvector_extractor=$DATA/voxceleb/0007_voxceleb_v2_1a/exp/xvector_nnet_1a
 
 #chunk_width=140,100,160 #rdi
 chunk_width=150,110,100 #tedlium
@@ -66,7 +67,7 @@ if [ $stage -le 16 ]; then
   fi
   if [ ! -d $xvector_dir ]; then
     echo "compute xvectors"
-    ./7c_xvector_extract.sh $test_set
+    ./7c_xvector_extract.sh --xvector_extractor $xvector_extractor $test_set
   fi
   if [ ! -d $xivector_dir ]; then
     echo "compute xievectors"
