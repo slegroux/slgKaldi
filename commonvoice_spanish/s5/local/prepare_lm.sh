@@ -6,6 +6,7 @@
 . ./cmd.sh
 set -e
 . ./path.sh
+
 stage=0
 
 . ./utils/parse_options.sh
@@ -38,8 +39,16 @@ if ! command ngram-count >/dev/null; then
   fi
 fi
 
+if [ $stage -le 0 ]; then
+  ngram-count -order 3 -interpolate -unk -map-unk "<UNK>" \
+      -limit-vocab -text $corpus -lm data/local/lm/trigram.arpa || exit 1;
 
-ngram-count -order 3 -interpolate -unk -map-unk "<UNK>" \
-    -limit-vocab -text $corpus -lm data/local/lm/trigram.arpa || exit 1;
+  gzip -f data/local/lm/trigram.arpa
+fi
 
-gzip -f data/local/lm/trigram.arpa
+if [ $stage -le 1 ]; then
+  ngram-count -order 4 -interpolate -unk -map-unk "<UNK>" \
+      -limit-vocab -text $corpus -lm data/local/lm/fourgram.arpa || exit 1;
+
+  gzip -f data/local/lm/fourgram.arpa
+fi
