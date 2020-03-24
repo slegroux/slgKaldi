@@ -7,10 +7,10 @@ set -euo pipefail
 
 stage=15
 
-test_set=test_35
+test_set=test
 lang=lang_chain
-model=exp/chain_online_cmn/tdnn64k_sp
-decode_dir=exp/chain_online_cmn/tdnn64k_sp/decode_tgsmall_test_35
+model=exp/chain/tdnnf_tedlium_train_combined
+decode_dir=${model}/decode_tgsmall_${test_set}
 
 echo "$0 $@"  # Print the command line for logging
 
@@ -19,7 +19,7 @@ echo "$0 $@"  # Print the command line for logging
 . ./utils/parse_options.sh
 
 
-decode_dir_mbr=$decode_dir.mbr
+decode_dir_mbr=${decode_dir}.mbr
 
 if [ $stage -eq 15 ]; then
   cp -r $decode_dir{,.mbr}
