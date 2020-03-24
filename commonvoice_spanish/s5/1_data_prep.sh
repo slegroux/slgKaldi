@@ -72,6 +72,8 @@ if [ $stage -le 5 ]; then
   local/prepare_lm.sh  $tmpdir/subs/lm/in_vocabulary.txt
 fi
 
+exit 1
+
 if [ $stage -le 6 ]; then
   # generate language model G.fst
   utils/format_lm.sh \
