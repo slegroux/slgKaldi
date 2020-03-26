@@ -5,7 +5,7 @@ set -euo pipefail
 
 stage=0
 
-train_set=train_combined
+train_set=train_sp_vp
 train_data_dir=data/${train_set}_hires
 train_lores=train_sp
 test_set=test
@@ -26,7 +26,7 @@ model_dir_xvec=exp/chain/tdnnf_tedlium_${train_set}_xvec
 
 graph=exp/chain/tree_${train_lores}/graph_tgsmall
 num_epochs=30
-train_stage=354
+train_stage=-10
 
 
 . cmd.sh
