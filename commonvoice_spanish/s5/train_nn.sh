@@ -23,8 +23,15 @@ lat_dir=data/${train_set}/tri3b_lats
 #ivector_dir=data/${train_set}_hires/ivectors
 model_dir=exp/chain/tdnnf_tedlium_${train_set}
 model_dir_xvec=exp/chain/tdnnf_tedlium_${train_set}_xvec
-
+lang_chain=data/lang_chain
 graph=exp/chain/tree_${train_lores}/graph_tgsmall
+
+rnnlm_dir=exp/rnnlm
+rnnlm_epochs=40
+n_gpu=8
+wordlist=${lang_chain}/words.txt
+rnnlm_data=data/rnnlm
+
 num_epochs=30
 train_stage=-10
 
@@ -68,6 +75,18 @@ fi
 if [ $stage -le 6 ]; then
     ./13_prepare_online_decoding.sh --stage 0 --model $model_dir --online_model ${model_dir}_online \
         --extractor $ivector_extractor --graph $graph --test_set test35
+fi
+
+# train rnnlm
+if [ $stage -le 7 ]; then
+    ./local/rnnlm/run_lstm_tdnn.sh --dir $rnnlm_dir --epochs $rnnlm_epochs --n_gpu $n_gpu \
+        --wordlist $wordlist --text_dir $rnnlm_data
+fi
+
+# test rnnlm
+if [ $stage -le 7 ]; then
+    ./local/rnnlm/rescore_vca.sh --rnnlm_dir $rnnlm_dir --lang_dir data/lang_test --test_set $test_set \
+        --model $model_dir
 fi
 
 # exit 1
