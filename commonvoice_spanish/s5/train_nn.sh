@@ -5,7 +5,8 @@ set -euo pipefail
 
 stage=0
 
-train_set=train_sp_vp
+#train_set=train_sp_vp
+train_set=train_combined
 train_data_dir=data/${train_set}_hires
 train_lores=train_sp
 test_set=test
@@ -22,7 +23,8 @@ tree=exp/chain/tree_train_sp
 lat_dir=data/${train_set}/tri3b_lats
 #ivector_dir=data/${train_set}_hires/ivectors
 model_dir=exp/chain/tdnnf_tedlium_${train_set}
-model_dir_xvec=exp/chain/tdnnf_tedlium_${train_set}_xvec
+#model_dir_xvec=exp/chain/tdnnf_tedlium_${train_set}_xvec
+model_dir_xvec=exp/chain/cnn_tdnnf_rdi_${train_set}_xvec
 lang_chain=data/lang_chain
 graph=exp/chain/tree_${train_lores}/graph_tgsmall
 
@@ -92,14 +94,20 @@ fi
 # exit 1
 # XVector training
 
+# if [ $stage -le 110 ]; then
+#     ./9_tdnnf_tedlium_s5_r3_xvec.sh --dir $model_dir_xvec \
+#         --tree-dir $tree #--stage 12 || exit 1
+# fi
+
+
 if [ $stage -le 110 ]; then
-    ./9_tdnnf_tedlium_s5_r3_xvec.sh --dir $model_dir_xvec \
-        --tree-dir $tree #--stage 12 || exit 1
+    ./7c_xvector_extract.sh --xvector_extractor $xvector_extractor $train_set
+    ./7d_concat_xivectors.sh $train_ivector_dir $train_xvector_dir $xivector_dir
 fi
 
 if [ $stage -le 111 ]; then
-    ./7c_xvector_extract.sh --xvector_extractor $xvector_extractor $train_set
-    ./7d_concat_xivectors.sh $train_ivector_dir $train_xvector_dir $xivector_dir
+    ./9_cnn_tdnnf_rdi_xvec.sh --dir $model_dir_xvec \
+        --tree-dir $tree #--stage 12 || exit 1
 fi
 
 if [ $stage -le 112 ]; then
