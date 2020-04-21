@@ -37,7 +37,6 @@ rnnlm_data=data/rnnlm
 num_epochs=30
 train_stage=-10
 
-
 . cmd.sh
 . path.sh
 . utils/parse_options.sh 
@@ -120,7 +119,7 @@ if [ $stage -le 113 ]; then
         --ivector_extractor $ivector_extractor --xvector_extractor $xvector_extractor \
         ${test_set}
 fi
-
+exit 1
 if [ $stage -eq 114 ]; then
     ./13_prepare_online_decoding.sh --stage 0 --model $model_dir_xvec --online_model ${model_dir_xvec}_online \
         --extractor $ivector_extractor --graph $graph --test_set test35
