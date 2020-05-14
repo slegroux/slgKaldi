@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # kaldi diarization tutorial
-# 2020 sylvain.legroux@gmail.com
+# (c) 2020 <slegroux@ccrma.stanford.edu>
 
 . path.sh
 
@@ -10,12 +10,12 @@ audio_dir=data/audio
 dataset=test
 mfccdir=mfcc
 vaddir=mfcc
-nnet_dir=/home/workfit/Sylvain/Data/kaldi_models/0003_sre16_v2_1a/exp
+nnet_dir=$DATA/models/en/0003_sre16_v2_1a/exp
 
 . ./utils/parse_options.sh
 
 np=$(( $(nproc) - 1 ))
-#set -x
+set -x
 
 
 # link to utils
@@ -71,6 +71,7 @@ fi
 if [ $stage -eq 4 ]; then
     diarization/vad_to_segments.sh --nj $nj --cmd "run.pl" \
     data/${dataset}_cmn data/${dataset}_cmn_segmented
+    cp data/${dataset}_cmn/{feats.scp,vad.scp} data/${dataset}_cmn_segmented
     utils/fix_data_dir.sh data/${dataset}_cmn_segmented
 fi
 
