@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # kaldi diarization tutorial
-# 2020 sylvain.legroux@gmail.com
+# 2020 <slegroux@ccrma.stanford.edu>
 
 . path.sh
 
@@ -10,7 +10,7 @@ audio_dir=data/audio
 dataset=test
 mfccdir=mfcc
 vaddir=mfcc
-nnet_dir=/home/workfit/Sylvain/Data/kaldi_models/0003_sre16_v2_1a/exp
+nnet_dir=$DATA/models/en/0003_sre16_v2_1a/exp
 
 . ./utils/parse_options.sh
 
