@@ -28,7 +28,7 @@ if [ $stage == 5 ]; then
     utils/validate_data_dir.sh data/$x
   done
   
-  utils/subset_data_dir.sh data/${train_set} $subset data/${train_set}_${subset}
+  # utils/subset_data_dir.sh data/${train_set} $subset data/${train_set}_${subset}
 fi
 
 if [ $stage == 51 ]; then
