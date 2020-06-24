@@ -3,11 +3,11 @@
 
 njobs=$(($(nproc)-1))
 train_set=train
+tri2b_ali=tri2b_ali
 
 # end configuration section
 . ./path.sh
 . utils/parse_options.sh
-
 
 echo ============================================================================
 echo " tri3b : LDA+MLLT+SAT Training "
@@ -17,7 +17,7 @@ echo ===========================================================================
 # parameters from heroico & same as lda_mllt
 num_leaves=3100
 tot_gauss=50000
-steps/train_sat.sh $num_leaves $tot_gauss data/${train_set} data/lang exp/tri2b_ali exp/tri3b
+steps/train_sat.sh $num_leaves $tot_gauss data/${train_set} data/lang exp/${tri2b_ali} exp/tri3b
 
 # Align the train data using tri3b model
 steps/align_fmllr.sh --nj $njobs data/${train_set} data/lang exp/tri3b exp/tri3b_ali
