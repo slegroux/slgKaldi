@@ -45,4 +45,5 @@ if [ ! -d ${train_set}_sp_vp_hires ]; then
 fi
 
 echo "train ivectors"
+# resulta are in ivectordir=data/${train_set}_sp_vp_hires/ivectors
 ./local/train_ivector.sh --gmm $gmm --online_cmvn_iextractor $online_cmvn_iextractor ${train_set}
