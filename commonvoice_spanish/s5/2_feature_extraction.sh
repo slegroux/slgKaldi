@@ -1,5 +1,5 @@
-#!/bin/bash
-# 2020 slegroux@ccrma.stanford
+#!/usr/bin/env bash
+# 2020 slegroux@ccrma.stanford.edu
 
 njobs=$(($(nproc)-1))
 stage=5
@@ -22,7 +22,15 @@ if [ $stage == 5 ]; then
     if [ -e data/$x/cmvn.scp ]; then
       rm data/$x/cmvn.scp
     fi
-    steps/make_mfcc.sh --mfcc-config conf/mfcc.conf --nj $njobs data/$x
+
+    n_speakers_test=$(cat data/${x}/spk2utt | wc -l)
+    if [ $njobs -le $n_speakers_test ]; then
+      nj=$njobs
+    else
+      nj=$n_speakers_test
+    fi
+    
+    steps/make_mfcc.sh --mfcc-config conf/mfcc.conf --nj $nj data/$x
     steps/compute_cmvn_stats.sh data/$x
     utils/fix_data_dir.sh data/$x
     utils/validate_data_dir.sh data/$x
