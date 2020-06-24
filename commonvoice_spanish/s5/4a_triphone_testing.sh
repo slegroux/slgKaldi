@@ -2,10 +2,10 @@
 # 2020 slegroux@ccrma.stanford.edu
 
 njobs=$(($(nproc)-1))
-training_set=train
 mono_ali_set=mono_ali
 test_set=test
 lang=data/lang_test
+compute_graph=true
 
 # end configuration section
 . ./path.sh
@@ -39,7 +39,7 @@ time steps/decode.sh \
   --nj $nj \
   ${graph_dir} data/${test_set} exp/tri1/decode_${test_set}
 
-echo "Monophone training" | tee -a WER.txt
+echo "Monophone testing" | tee -a WER.txt
 #cat conf/monophone.conf | tee -a WER.txt
 for x in exp/tri1/decode_${test_set}; do
   [ -d $x ] && [[ $x =~ "$1" ]] && grep WER $x/wer_* | utils/best_wer.sh |tee -a WER.txt
