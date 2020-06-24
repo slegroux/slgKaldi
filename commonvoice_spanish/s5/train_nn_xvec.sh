@@ -6,14 +6,16 @@ set -euo pipefail
 stage=0
 
 #train_set=train_sp_vp
-train_set=train_combined
+# train_set=train_combined
+
+train_set=train_1000_sp_vp
 train_data_dir=data/${train_set}_hires
 train_lores=train_sp
-test_set=test
-train_ivector_dataset=train_sp_vp
+test_set=test35
 
 train_ivector_dir=data/${train_set}_hires/ivectors
-ivector_extractor=exp/nnet3_${train_ivector_dataset}/extractor
+# ivector_extractor=exp/nnet3_${train_ivector_dataset}/extractor
+ivector_extractor exp/nnet3_${train_set}/extractor
 
 train_xvector_dir=data/${train_set}_x/xvectors
 xivector_dir=data/${train_set}_x/xivectors
@@ -41,20 +43,14 @@ train_stage=-10
 . path.sh
 . utils/parse_options.sh 
 
-# train ivectors
-if [ $stage -le 0 ]; then
-    ./7_ivector_training.sh --train_set ${train_set} 
-fi
 
-if [ $stage -le 1 ]; then
-    # if training on non sp_vp_hires need to compute mfcc feats
-    ./7a_ivector_extract.sh --ivector_extractor $ivector_extractor \
-        $train_set 
-fi
 
 if [ $stage -le 2 ]; then
+    # train_ivector_dir: i-vector data already extracted
     ./8_dnn_prep.sh --stage 7 --train_set $train_set --train_ivector_dir $train_ivector_dir || exit 1
 fi
+
+exit 1
 
 if [ $stage -le 3 ]; then
     ./9_tdnnf_tedlium_s5_r3.sh --dir $model_dir \
@@ -120,6 +116,7 @@ if [ $stage -le 113 ]; then
         ${test_set}
 fi
 exit 1
+
 if [ $stage -eq 114 ]; then
     ./13_prepare_online_decoding.sh --stage 0 --model $model_dir_xvec --online_model ${model_dir_xvec}_online \
         --extractor $ivector_extractor --graph $graph --test_set test35
