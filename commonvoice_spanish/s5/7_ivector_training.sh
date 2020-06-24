@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # 2020 slegroux@ccrma.stanford.edu
 
 # Set -e here so that we catch if any executable fails immediately

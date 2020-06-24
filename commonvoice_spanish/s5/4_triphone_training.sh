@@ -2,13 +2,12 @@
 # 2020 slegroux@ccrma.stanford.edu
 
 njobs=$(($(nproc)-1))
-training_set=train
+train_set=train
+mono_ali_set=mono_ali
 
 # end configuration section
 . ./path.sh
 . utils/parse_options.sh
-
-n_speakers_test=$(cat data/test/spk2utt | wc -l)
 
 
 echo ============================================================================
@@ -21,7 +20,7 @@ cluster_thresh=100
 num_leaves=1500
 tot_gauss=25000
 
-steps/train_deltas.sh --cluster-thresh $cluster_thresh $num_leaves $tot_gauss data/${training_set} data/lang exp/mono_ali exp/tri1
+steps/train_deltas.sh --cluster-thresh $cluster_thresh $num_leaves $tot_gauss data/${training_set} data/lang exp/${mono_ali_set} exp/tri1
 
 #Align the train data using tri1 model
-steps/align_si.sh --nj $njobs data/${training_set} data/lang exp/tri1 exp/tri1_ali
+steps/align_si.sh --nj $njobs data/${train_set} data/lang exp/tri1 exp/tri1_ali

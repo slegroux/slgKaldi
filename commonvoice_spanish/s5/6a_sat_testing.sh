@@ -31,7 +31,7 @@ fi
 steps/decode_fmllr.sh --nj $nj $graph_dir data/${test_set} exp/tri3b/decode_${test_set}
 
 
-echo "SAT training" | tee -a WER.txt
+echo "SAT testing" | tee -a WER.txt
 for x in exp/tri3b/decode_${test_set}; do
   [ -d $x ] && [[ $x =~ "$1" ]] && grep WER $x/wer_* | utils/best_wer.sh  |tee -a WER.txt
 done
