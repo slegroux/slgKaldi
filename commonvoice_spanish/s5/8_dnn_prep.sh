@@ -34,14 +34,14 @@ lang=data/lang_chain
 lat_dir=data/${train_set}/${gmm}_lats
 
 # if features haven't  been extracted yet, do so
-
+# should be done in train_ivector.sh though
 if [ $stage -le 7 ]; then
-  # extract hires mfcc
+  # extract normal mfcc
   ./local/make_mfcc.sh ${train_set} || exit 1
 fi
 
 if [ $stage -le 8 ]; then
-# extract normal mfcc
+# extract hires mfcc
   ./local/make_mfcc_hires.sh ${train_set} || exit 1
 fi
 

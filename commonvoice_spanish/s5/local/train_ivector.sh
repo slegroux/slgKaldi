@@ -29,7 +29,6 @@ for f in data/${train_set}/feats.scp ${gmm_dir}/final.mdl; do
   fi
 done
 
-
 if [ $stage -le 4 ]; then
   echo "$0: computing a subset of data to train the diagonal UBM."
   # We'll use about a quarter of the data.
@@ -59,7 +58,7 @@ if [ $stage -le 4 ]; then
   echo "$0: training the diagonal UBM."
   # Use 512 Gaussians in the UBM.
   steps/online/nnet2/train_diag_ubm.sh --cmd "$train_cmd" --nj $nj \
-    --num-frames 700000 \ 
+    --num-frames 700000 \
     ${temp_data_root}/${train_set}_sp_vp_hires_subset 512 \
     exp/nnet3${nnet3_affix}/pca_transform exp/nnet3${nnet3_affix}/diag_ubm
   #  --num-threads 8 \

@@ -28,9 +28,9 @@ if $compute_graph; then
 fi
 
 #Decoder
-steps/decode.sh --nj $n_speakers_test $graph_dir data/${test_set} exp/tri2b/decode_${test_set}
+steps/decode.sh --nj $nj $graph_dir data/${test_set} exp/tri2b/decode_${test_set}
 
-echo "LDA MLLT training" | tee -a WER.txt
+echo "LDA MLLT testing" | tee -a WER.txt
 for x in exp/tri2b/decode_${test_set}; do
   [ -d $x ] && [[ $x =~ "$1" ]] && grep WER $x/wer_* | utils/best_wer.sh |tee -a WER.txt
 done

@@ -5,7 +5,7 @@
 set -euo pipefail
 
 stage=0
-ivector_extractor=exp/nnet3_train/extractor
+ivector_extractor=exp/nnet3_train_sp_vp/extractor
 
 echo "$0 $@"  # Print the command line for logging
 
@@ -37,3 +37,4 @@ if [ $stage -le 1 ]; then
   steps/online/nnet2/extract_ivectors_online.sh --cmd "run.pl" --nj $nj \
     data/${dataset}_hires $ivector_extractor $ivector_dir
 fi
+

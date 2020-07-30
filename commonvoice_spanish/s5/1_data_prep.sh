@@ -6,7 +6,7 @@
 
 stage=0
 
-datadir=$DATA/commonvoice_spanish
+datadir=$DATA/es/common_voice
 slgasr_dir=~/slgASR
 # The corpus and lexicon are on openslr.org
 #speech_url="http://www.openslr.org/resources/39/LDC2006S37.tar.gz"

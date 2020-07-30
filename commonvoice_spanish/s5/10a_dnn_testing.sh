@@ -10,7 +10,7 @@ stage=16
 gmm=tri3b
 dir=exp/chain/tdnnf_tedlium_train
 tree_dir=exp/chain/tree_train
-ivector_extractor=exp/nnet3_train/extractor
+ivector_extractor=exp/nnet3_train_sp_vp/extractor
 # test_set=test35
 lang=data/lang_test
 
