@@ -1,28 +1,29 @@
 #!/usr/bin/env bash
-# 2020 slegroux@ccrma.stanford.edu
 
-njobs=$(($(nproc)-1))
-training_set=train
-decode=true
-subset=4000
+# Monophone training
+# Arguments:
+#   dataset, lang
+# Outputs:
+#   mono, (mono_ali)
+# (c) 2020 Sylvain Le Groux <slegroux@ccrma.stanford.edu>
 
-. ./path.sh
+mono_conf=conf/monophone.conf
+
+. path.sh
+. utils.sh
 . utils/parse_options.sh
 
+dataset=$1
+lang=$2
+mono=$3
 
-echo ============================================================================
-echo " MonoPhone Training "
-echo ============================================================================
-
-if [ ! -d data/${training_set}_${subset} ]; then
-  utils/subset_data_dir.sh data/${training_set} $subset data/${training_set}_${subset}
-fi
-
-#Train monophone model
+echo "[INFO] MonoPhone Training "
+nj=$(get_njobs $dataset)
+# Train monophone model
 time steps/train_mono.sh \
-  --nj $njobs \
-  --config conf/monophone.conf \
-  data/${training_set}_${subset} data/lang exp/mono
+  --nj $nj \
+  --config ${mono_conf} \
+  ${dataset} ${lang} ${mono}
 
 #Align the train data using mono-phone model
-steps/align_si.sh --nj $njobs data/${training_set} data/lang exp/mono exp/mono_ali
+steps/align_si.sh --nj $nj ${dataset} ${lang} ${mono} ${mono}_ali
