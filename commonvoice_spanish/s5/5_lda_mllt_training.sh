@@ -1,24 +1,25 @@
 #!/bin/bash
-# 2020 slegroux@ccrma.stanford.edu
+# (c) 2020 Sylvain Le Groux <slegroux@ccrma.stanford.edu>
 
-njobs=$(($(nproc)-1))
-train_set=train
-tri1_ali=tri1_ali
+nj=$(($(nproc)-2))
 
-. ./path.sh
+. path.sh
+. utils.sh
 . utils/parse_options.sh
 
+dataset=$1
+lang=$2
+tri1_ali=$3
+tri2=$4
 
-echo ============================================================================
-echo " tri2b : LDA + MLLT Training & Decoding / Speaker Adaptation"
-echo ============================================================================
+log_info "LDA + MLLT training / speaker adaptation"
 
-#Train LDA + MLLT model based on tri1_ali
 # parameters from heroico
 num_leaves=3100
 tot_gauss=50000
 
-steps/train_lda_mllt.sh --splice-opts "--left-context=3 --right-context=3" \
-  $num_leaves $tot_gauss data/${train_set} data/lang exp/${tri1_ali} exp/tri2b
+log_time steps/train_lda_mllt.sh --splice-opts "--left-context=3 --right-context=3" \
+  $num_leaves $tot_gauss ${dataset} ${lang} ${tri1_ali} ${tri2}
 
-steps/align_si.sh --nj $njobs data/${train_set} data/lang exp/tri2b exp/tri2b_ali
+log_info "Lda mllt alignement"
+log_time steps/align_si.sh --nj $nj ${dataset} ${lang} ${tri2} ${tri2}_ali
