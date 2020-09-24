@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Extract MFCC or PLP features from kaldi formatted folder
 # (c) 2020 Sylvain Le Groux <slegroux@ccrma.stanford.edu>
 
 feature_type="mfcc"
