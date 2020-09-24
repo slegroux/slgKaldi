@@ -17,13 +17,13 @@ dataset=$1
 lang=$2
 mono=$3
 
-echo "[INFO] MonoPhone Training "
-nj=$(get_njobs $dataset)
-# Train monophone model
-time steps/train_mono.sh \
+log_info "MonoPhone Training"
+nj=$(($(nproc)-2))
+
+log_time steps/train_mono.sh \
   --nj $nj \
   --config ${mono_conf} \
   ${dataset} ${lang} ${mono}
 
-#Align the train data using mono-phone model
-steps/align_si.sh --nj $nj ${dataset} ${lang} ${mono} ${mono}_ali
+log_info "Align MonoPhone"
+log_time steps/align_si.sh --nj $nj ${dataset} ${lang} ${mono} ${mono}_ali

@@ -1,26 +1,31 @@
-#!/bin/bash
-# 2020 slegroux@ccrma.stanford.edu
+#!/usr/bin/env bash
 
-njobs=$(($(nproc)-1))
-train_set=train
-mono_ali_set=mono_ali
+# Triphone training
+# Arguments:
+#   dataset, lang, mono_ali
+#   clustering param (thre,leaves,gauss)
+# Outputs:
+#   tri, (tri_ali)
+# 
+# (c) 2020 Sylvain Le Groux <slegroux@ccrma.stanford.edu>
 
-# end configuration section
-. ./path.sh
+njobs=$(($(nproc)-2))
+
+. path.sh
 . utils/parse_options.sh
+. utils.sh
 
+dataset=$1
+lang=$2
+mono_ali=$3
+tri=$4
 
-echo ============================================================================
-echo " tri1 : TriPhone with delta delta-delta features Training      "
-echo ============================================================================
+# log_info "Triphone delta training"
+# # parameters from heroico
+# cluster_thresh=100
+# num_leaves=1500
+# tot_gauss=25000
+# log_time steps/train_deltas.sh --cluster-thresh $cluster_thresh $num_leaves $tot_gauss ${dataset} ${lang} ${mono_ali} ${tri}
 
-#Train Deltas + Delta-Deltas model based on mono_ali
-# parameters from heroico
-cluster_thresh=100
-num_leaves=1500
-tot_gauss=25000
-
-steps/train_deltas.sh --cluster-thresh $cluster_thresh $num_leaves $tot_gauss data/${training_set} data/lang exp/${mono_ali_set} exp/tri1
-
-#Align the train data using tri1 model
-steps/align_si.sh --nj $njobs data/${train_set} data/lang exp/tri1 exp/tri1_ali
+log_info "Triphone alignment"
+log_time steps/align_si.sh --nj $njobs ${dataset} ${lang} ${tri} ${tri}_ali

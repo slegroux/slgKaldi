@@ -1,5 +1,5 @@
-#!/bin/bash
-# 2020 slegroux@ccrma.stanford.edu
+#!/usr/bin/env bash
+# (c) 2020 Sylvain Le Groux <slegroux@ccrma.stanford.edu>
 
 njobs=$(($(nproc)-1))
 mono_ali_set=mono_ali
@@ -7,16 +7,17 @@ test_set=test
 lang=data/lang_test
 compute_graph=true
 
-# end configuration section
-. ./path.sh
+
+. path.sh
+. utils.sh
 . utils/parse_options.sh
 
 n_speakers_test=$(cat data/${test_set}/spk2utt | wc -l)
 graph_dir=exp/tri1/graph
 
-echo ============================================================================
+
 echo " tri1 : TriPhone with delta delta-delta features Decoding      "
-echo ============================================================================
+
 
 #Train Deltas + Delta-Deltas model based on mono_ali
 # parameters from heroico
