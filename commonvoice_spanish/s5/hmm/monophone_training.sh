@@ -7,9 +7,10 @@
 #   mono, (mono_ali)
 # (c) 2020 Sylvain Le Groux <slegroux@ccrma.stanford.edu>
 
-mono_conf=conf/monophone.conf
-# TODO: give subset option for monophone training on short utterances
+mono_config=conf/monophone.conf
+# TODO(slegroux): give subset option for monophone training on short utterances
 subset=
+boost_silence=1.0
 
 . path.sh
 . utils.sh
@@ -20,12 +21,22 @@ lang=$2
 mono=$3
 
 log_info "MonoPhone Training"
-nj=$(($(nproc)-2))
+nj=$(get_njobs $dataset)
 
-log_time steps/train_mono.sh \
+if [ $subset ]; then
+  log_info "train on ${subset} shortest utts only"
+  utils/subset_data_dir.sh --shortest ${dataset} ${subset} ${dataset}_${subset}
+
+  log_time steps/train_mono.sh --boost-silence ${boost_silence} \
   --nj $nj \
-  --config ${mono_conf} \
-  ${dataset} ${lang} ${mono}
+  --config ${mono_config} \
+  ${dataset}_${subset} ${lang} ${mono}
+else
+  log_time steps/train_mono.sh --boost-silence ${boost_silence} \
+    --nj $nj \
+    --config ${mono_config} \
+    ${dataset} ${lang} ${mono}
+fi
 
 log_info "Align MonoPhone"
-log_time steps/align_si.sh --nj $nj ${dataset} ${lang} ${mono} ${mono}_ali
+log_time steps/align_si.sh --nj $nj --boost-silence ${boost_silence} ${dataset} ${lang} ${mono} ${mono}_ali

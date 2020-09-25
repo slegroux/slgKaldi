@@ -17,7 +17,7 @@ lang_test=data/lang_test
 # mono
 mono=exp/mono_500
 if [ "$stage" == 1 ]; then
-    ./hmm/monophone_training.sh ${train_set} ${lang_train} ${mono}
+    ./hmm/monophone_training.sh --boost-silence 1.25 --subset 400 ${train_set} ${lang_train} ${mono}
 fi
 
 if [ "$stage" == 11 ]; then
@@ -28,7 +28,7 @@ fi
 mono_ali=exp/mono_500_ali
 tri1=exp/tri1_500
 if [ "$stage" == 2 ]; then
-    ./hmm/triphone_training.sh ${train_set} ${lang_train} ${mono_ali} ${tri1}
+    ./hmm/triphone_training.sh --boost-silence 1.0 ${train_set} ${lang_train} ${mono_ali} ${tri1}
 fi
 
 if [ "$stage" == 21 ]; then
