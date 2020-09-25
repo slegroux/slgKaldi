@@ -8,6 +8,8 @@
 # (c) 2020 Sylvain Le Groux <slegroux@ccrma.stanford.edu>
 
 mono_conf=conf/monophone.conf
+# TODO: give subset option for monophone training on short utterances
+subset=
 
 . path.sh
 . utils.sh
