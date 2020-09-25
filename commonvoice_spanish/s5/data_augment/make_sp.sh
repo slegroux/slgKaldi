@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # (c) 2020 Sylvain Le Groux <slegroux@ccrma.stanford.edu>
 
-
 . path.sh
 . utils.sh
 . utils/parse_options.sh
