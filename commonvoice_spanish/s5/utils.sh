@@ -27,7 +27,7 @@ log_time(){
 
 log_info(){
     msg=$1
-    echo -e "\n[INFO] $(date +'%Y/%m/%d')" $msg | tee -a $LOG_FILE
+    echo -e "\n[INFO] $(date +'%Y-%m-%d-%H-%M-%S')" $msg | tee -a $LOG_FILE
 }
 
 log_wer(){
