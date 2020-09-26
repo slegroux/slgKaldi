@@ -42,8 +42,8 @@ fi
 
 log_info "Get alignments as lattices"
 log_time steps/align_fmllr_lats.sh --nj $nj --cmd "run.pl" ${dataset} \
-  ${lang} ${tri3} ${dataset}_ali_lats
-rm ${dataset}_ali_lats/fsts.*.gz # save space
+  ${lang} ${tri3} ${tri3}_sp_vp_ali_lats
+rm ${tri3}_sp_vp_ali_lats/fsts.*.gz # save space
 
 
 # Build a tree using our new topology.  We know we have alignments for the
@@ -54,8 +54,13 @@ if [ -f $tree_dir/final.mdl ]; then
   echo "$0: $tree_dir/final.mdl already exists, refusing to overwrite it."
   exit 1;
 fi
+
+if [! -f ${tri3}_sp_ali/ali.1.gz ]; then
+  echo "$0: expected align file $f to exist" && exit 1
+fi
+# note we use sp_ali not sp_vp_ali_lats
 steps/nnet3/chain/build_tree.sh \
   --frame-subsampling-factor 3 \
   --context-opts "--context-width=2 --central-position=1" \
   --cmd "run.pl" ${num_leaves} ${dataset} \
-  ${lang_chain} ${dataset}_ali_lats $tree_dir
+  ${lang_chain} ${tri3}_sp_ali $tree_dir

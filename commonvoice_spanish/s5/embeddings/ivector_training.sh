@@ -86,5 +86,3 @@ nj=$(get_njobs ${dataset}_max2)
 log_info "Extract ivec for max2"
 log_time steps/online/nnet2/extract_ivectors_online.sh --cmd "run.pl" --nj $nj \
   ${dataset}_max2 ${ivec_model}/extractor ${dataset}_max2/ivectors
-
-
