@@ -49,10 +49,10 @@ fi
 # sat
 tri2_ali=exp/tri2_500_ali
 tri3=exp/tri3_500
-if [ "$stage" == 3 ]; then
+if [ "$stage" == 4 ]; then
     ./hmm/sat_training.sh ${train_set} ${lang_train} ${tri2_ali} ${tri3}
 fi
-if [ "$stage" == 3 ]; then
+if [ "$stage" == 41 ]; then
     ./hmm/am_testing.sh --mono false --compile_graph true ${test_set} ${lang_test} ${tri3} ${tri3}/graph
 fi
 

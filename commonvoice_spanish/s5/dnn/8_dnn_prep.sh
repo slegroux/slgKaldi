@@ -14,7 +14,7 @@ gmm=tri3b
 
 echo "$0 $@"  # Print the command line for logging
 
-. cmd.sh
+. utils.sh
 . path.sh
 . utils/parse_options.sh
 
