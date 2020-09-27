@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# (c) 2020 Sylvain Le Groux <slegroux@ccrma.stanford.edu>
+
+
+
+#online_cmvn=true #tdnn
+online_cmvn=false #cnn-tdnn
+# chunk_width=140,100,160
+chunk_width=150,110,100 #tedlium
+compute_graph=true
+
+. utils.sh
+. path.sh
+. utils/parse_options.sh
+
+test_set=$1
+# tree_dir=exp/chain/tree_train
+lang=$2
+tree_dir=$3
+ivector_data=$4
+mdl=$5
+
+nj=$(get_njobs $test_set)
+
+if $compute_graph; then
+  # Note: it's not important to give mkgraph.sh the lang directory with the
+  # matched topology (since it gets the topology file from the model).
+  log_info "make graph"
+  log_time utils/mkgraph.sh \
+    --self-loop-scale 1.0 $lang \
+    $tree_dir $tree_dir/graph_tgsmall
+fi
+
+#Decoder
+log_info "dnn decoding"
+log_time steps/nnet3/decode.sh \
+    --acwt 1.0 --post-decode-acwt 10.0 \
+    --frames-per-chunk $frames_per_chunk \
+    --nj $nj --cmd "run.pl" \
+    --online-ivector-dir $ivector_data \
+    $tree_dir/graph_tgsmall ${test_set}_hires ${mdl}/decode_tgsmall
+
+log_wer ${mdl}/decode_tgsmall
+
+
+exit 1
+if [$stage -le 17 ]; then
+  steps/lmrescore_const_arpa.sh --cmd "$decode_cmd" \
+  data/${lang}_{tgsmall,tglarge} \
+  data/${test_set}_hires ${dir}/decode_{tgsmall,tglarge}_${test_set} || exit 1
+  
+  echo "large lm rescoring" | tee -a WER.txt
+  for x in ${dir}/decode_tglarge_${data}; do [ -d $x ] && grep WER $x/wer_* | utils/best_wer.sh; done | tee -a WER.txt
+fi
+
+# Not testing the 'looped' decoding separately, because for
+# TDNN systems it would give exactly the same results as the
+# normal decoding.
+
+
