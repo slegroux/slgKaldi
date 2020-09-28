@@ -2,6 +2,7 @@
 # (c) 2020 Sylvain Le Groux <slegroux@ccrma.stanford.edu>
 
 unk="<UNK>"
+lang='es'
 
 . utils.sh
 . path.sh
@@ -9,12 +10,17 @@ unk="<UNK>"
 
 lexicon=$1
 dict=$2
-lang=$3
+lang_dir=$3
 
 tmp=$(mktemp -d /tmp/lang-XXXX) #data/local/lang
 
-./data_prep/es_prepare_dict.sh --unk ${unk} ${lexicon} ${dict}
+if [ $lang == $es ]; then
+    ./data_prep/es_prepare_dict.sh --unk ${unk} ${lexicon} ${dict}
+else
+    echo "[ERROR] langauge not supported"
+fi
+
 ./utils/prepare_lang.sh \
     ${dict} ${unk} \
-    ${tmp} ${lang}
+    ${tmp} ${lang_dir}
 
