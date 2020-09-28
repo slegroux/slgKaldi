@@ -3,19 +3,16 @@
 # Copyright 2017 John Morgan
 # Apache 2.0.
 
-. ./cmd.sh
 set -e
-. ./path.sh
+. path.sh
 
 stage=0
+unk="<UNK>"
 
-. ./utils/parse_options.sh
-
-if [ ! -d data/local/lm ]; then
-    mkdir -p data/local/lm
-fi
+. utils/parse_options.sh
 
 corpus=$1
+lm=$2
 
 if [ ! -f $corpus ]; then
   echo "$0: input data $corpus not found."
@@ -40,15 +37,15 @@ if ! command ngram-count >/dev/null; then
 fi
 
 if [ $stage -le 0 ]; then
-  ngram-count -order 3 -interpolate -unk -map-unk "<UNK>" \
-      -limit-vocab -text $corpus -lm data/local/lm/trigram.arpa || exit 1;
+  ngram-count -order 3 -interpolate -unk -map-unk ${unk} \
+      -limit-vocab -text $corpus -lm ${lm}/trigram.arpa || exit 1;
 
-  gzip -f data/local/lm/trigram.arpa
+  gzip -f ${lm}/trigram.arpa
 fi
 
 if [ $stage -le 1 ]; then
-  ngram-count -order 4 -interpolate -unk -map-unk "<UNK>" \
-      -limit-vocab -text $corpus -lm data/local/lm/fourgram.arpa || exit 1;
+  ngram-count -order 4 -interpolate -unk -map-unk ${unk} \
+      -limit-vocab -text $corpus -lm ${lm}/fourgram.arpa || exit 1;
 
-  gzip -f data/local/lm/fourgram.arpa
+  gzip -f ${lm}/fourgram.arpa
 fi

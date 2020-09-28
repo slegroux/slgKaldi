@@ -4,6 +4,7 @@
 set -euo pipefail
 
 online_cmvn_iextractor=false
+nj=6
 
 . utils.sh
 . path.sh
@@ -36,19 +37,19 @@ num_utts=$[$num_utts_total/4]
 utils/data/subset_data_dir.sh ${dataset} \
     $num_utts ${dataset}_subset
 
-nj=$(get_njobs $dataset)
 
 log_info "Compute PCA transform from the hires data."
 
 log_time steps/online/nnet2/get_pca_transform.sh --cmd "run.pl" \
     --splice-opts "--left-context=3 --right-context=3" \
     --max-utts 10000 --subsample 2 \
-      ${dataset}_subset \
-      ${ivec_model}/pca_transform
+    ${dataset}_subset \
+    ${ivec_model}/pca_transform
 
 log_info "Train diagonal UBM."
 # Use 512 Gaussians in the UBM.
-log_time steps/online/nnet2/train_diag_ubm.sh --cmd "run.pl" --nj $nj \
+nj_diag_ubm=$(get_njobs $dataset)
+log_time steps/online/nnet2/train_diag_ubm.sh --cmd "run.pl" --nj $nj_diag_ubm \
   --num-frames 700000 \
   ${dataset}_subset 512 \
   ${ivec_model}/pca_transform ${ivec_model}/diag_ubm

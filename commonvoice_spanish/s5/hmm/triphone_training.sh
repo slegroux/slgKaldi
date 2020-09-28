@@ -9,11 +9,13 @@
 # 
 # (c) 2020 Sylvain Le Groux <slegroux@ccrma.stanford.edu>
 
+. utils.sh
+. path.sh
+
+
 boost_silence=1.0
 
-. path.sh
 . utils/parse_options.sh
-. utils.sh
 
 dataset=$1
 lang=$2
