@@ -22,7 +22,7 @@ log_time(){
     end=$(date +%s)
     runtime=$((end-start))
     echo "[CMD] $@" | tee -a $LOG_FILE
-    echo "[RUNTIME] $runtime" | tee -a $LOG_FILE
+    echo "[RUNTIME] $(date -d@${runtime} -u +%H:%M:%S)" | tee -a $LOG_FILE
 }
 
 log_info(){
@@ -33,4 +33,12 @@ log_info(){
 log_wer(){
     decode_dir=$1
     echo "[WER]" $(grep WER ${decode_dir}/wer_* | utils/best_wer.sh) | tee -a $LOG_FILE
+}
+
+filter_from_list(){
+    # cat exp/20200927/mono/log/align.2.*.log|grep "len = "
+    src=$1
+    blacklist=$1
+    mv ${src} ${src}.tmp
+    cat ${src}.tmp |grep -v -f ${blacklist} >${src}
 }
