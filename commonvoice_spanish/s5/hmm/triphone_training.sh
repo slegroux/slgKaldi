@@ -12,7 +12,6 @@
 . utils.sh
 . path.sh
 
-
 boost_silence=1.0
 
 . utils/parse_options.sh

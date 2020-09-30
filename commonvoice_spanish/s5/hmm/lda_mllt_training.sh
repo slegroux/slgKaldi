@@ -4,13 +4,14 @@
 . path.sh
 . utils.sh
 
-nj=$(get_njobs $dataset)
 . utils/parse_options.sh
 
 dataset=$1
 lang=$2
 tri1_ali=$3
 tri2=$4
+
+nj=$(get_njobs $dataset)
 
 log_info "LDA + MLLT training / speaker adaptation"
 

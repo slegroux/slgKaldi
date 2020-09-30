@@ -41,7 +41,7 @@ fi
 # use the same num-jobs as the alignments
 
 log_info "Get alignments as lattices"
-log_time steps/align_fmllr_lats.sh --nj $nj --cmd "run.pl" ${dataset} \
+log_time steps/align_fmllr_lats.sh --nj ${nj} --cmd "run.pl" ${dataset} \
   ${lang} ${tri3} ${tri3}_sp_vp_ali_lats
 rm ${tri3}_sp_vp_ali_lats/fsts.*.gz # save space
 
@@ -55,7 +55,7 @@ if [ -f $tree_dir/final.mdl ]; then
   exit 1;
 fi
 
-if [! -f ${tri3}_sp_ali/ali.1.gz ]; then
+if [ ! -f ${tri3}_sp_ali/ali.1.gz ]; then
   echo "$0: expected align file $f to exist" && exit 1
 fi
 # note we use sp_ali not sp_vp_ali_lats

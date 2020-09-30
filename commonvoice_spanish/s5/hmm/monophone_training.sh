@@ -11,7 +11,7 @@ mono_config=conf/monophone.conf
 # TODO(slegroux): give subset option for monophone training on short utterances
 subset=
 boost_silence=1.0
-nj=100
+nj=
 
 . path.sh
 . utils.sh
@@ -23,15 +23,14 @@ mono=$3
 
 
 log_info "MonoPhone Training"
-
-if [ $subset ]; then
+if [ ! -z ${subset} ]; then
   log_info "train on ${subset} shortest utts only"
   utils/subset_data_dir.sh --shortest ${dataset} ${subset} ${dataset}_${subset}
 
   log_time steps/train_mono.sh --boost-silence ${boost_silence} \
-  --nj $nj \
-  --config ${mono_config} \
-  ${dataset}_${subset} ${lang} ${mono}
+    --nj $nj \
+    --config ${mono_config} \
+    ${dataset}_${subset} ${lang} ${mono}
 else
   log_time steps/train_mono.sh --boost-silence ${boost_silence} \
     --nj $nj \

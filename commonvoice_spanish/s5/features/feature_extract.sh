@@ -9,11 +9,17 @@ feature_type="mfcc"
 mfcc_config=conf/mfcc.conf
 plp_config=conf/plp.conf
 subset=4000
-njobs=
+nj=
 . utils/parse_options.sh
 
 dataset=$1
-nj=$(get_njobs $dataset)
+
+if [ ! -z ${nj} ]; then
+  echo "nj set by user: $nj"
+else
+  nj=$(get_njobs $dataset)
+  echo "nj set as max n_speakers $nj"
+fi
 
 log_info "Feature extraction njobs: $nj"
 

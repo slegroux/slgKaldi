@@ -3,6 +3,7 @@
 # train on hires data
 
 set -euo pipefail
+set -x
 
 train_stage=-10
 num_epochs=5
@@ -56,7 +57,7 @@ steps/nnet3/chain/train.py --stage=$train_stage \
   --egs.chunk-width=$chunk_width \
   --trainer.num-chunk-per-minibatch=64 \
   --trainer.frames-per-iter=$frames_per_iter \
-  --trainer.num-epochs=$num_epochs \
+  --trainer.num-epochs=${num_epochs} \
   --trainer.optimization.num-jobs-initial=$n_gpu \
   --trainer.optimization.num-jobs-final=$n_gpu \
   --trainer.optimization.initial-effective-lrate=0.00025 \

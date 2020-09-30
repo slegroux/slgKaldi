@@ -14,13 +14,15 @@ lang_dir=$3
 
 tmp=$(mktemp -d /tmp/lang-XXXX) #data/local/lang
 
-if [ $lang == $es ]; then
-    ./data_prep/es_prepare_dict.sh --unk ${unk} ${lexicon} ${dict}
+log_info "Prepare dict"
+if [ $lang == 'es' ]; then
+    log_time ./data_prep/es_prepare_dict.sh --unk ${unk} ${lexicon} ${dict}
 else
     echo "[ERROR] langauge not supported"
 fi
 
-./utils/prepare_lang.sh \
+log_info "Prepare lang"
+log_time ./utils/prepare_lang.sh \
     ${dict} ${unk} \
     ${tmp} ${lang_dir}
 
