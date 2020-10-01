@@ -35,13 +35,15 @@ fi
 #  https://kaldi-asr.org/doc/data_prep.html#data_prep_grammar
 # TODO(slg): download corpus + pocolm
 if [ $stage -eq 2 ]; then
-    ./data_prep/prepare_text.sh ${lm_corpus} ${lm_train} 
-    # ./lm/make_srilm.sh --unk ${unk} ${lm_train} ${lm_dir}
-    ./lm/make_pocolm.sh --order ${lm_order} --limit-unk-history true \
-        ${lm_train} ${lm_dir}
+    # ./data_prep/prepare_text.sh ${corpus_train} ${lm_train}
+    # ./data_prep/prepare_text.sh ${corpus_dev} ${lm_dev}
+
+    ./lm/make_srilm.sh --unk ${unk} ${lm_train} ${lm_dir}
+    ./lm/make_pocolm.sh --order ${lm_order} --limit_unk_history ${limit_unk_history} \
+        ${lm_train} ${lm_dev} ${lm_dir}
     utils/format_lm.sh \
         ${lang_dir} ${lm_dir}/${lm_order}gram_unpruned.arpa.gz ${dict}/lexicon.txt \
-        ${g_dir}
+        ${lm}
 fi
 
 # FEATURES

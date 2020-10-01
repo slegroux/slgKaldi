@@ -3,11 +3,13 @@
 
 order=3
 wordlist=
+limit_unk_history=true
 
 . path.sh
 . utils/parse_options.sh
+. utils.sh
 
-if [ $# != 2 ]; then
+if [ $# != 3 ]; then
   echo "Usage: make_pocolm.sh <corpus> <dir>"
   echo "main options (for others, see top of script file): "
   echo "--order <order>                           # order of language model (default trigram) "
@@ -15,8 +17,9 @@ if [ $# != 2 ]; then
   exit 1;
 fi
 
-corpus=$1
-pocolm_dir=$2
+train=$1
+dev=$2
+pocolm_dir=$3
 
 # create necessary folders
 mkdir -p $pocolm_dir
@@ -30,21 +33,25 @@ lm_work_dir=${pocolm_dir}/unpruned_work
 mkdir -p $lm_work_dir
 
 # take the last 20% as dev set
-num_dev_sentences=$(echo "$(cat ${corpus} | wc -l) * 20 / 100" | bc)
-tail -n $num_dev_sentences < ${corpus} > $pocolm_data_dir/dev.txt
-head -n -$num_dev_sentences < ${corpus} > $pocolm_data_dir/train.txt
+# num_dev_sentences=$(echo "$(cat ${corpus} | wc -l) * 20 / 100" | bc)
+# tail -n $num_dev_sentences < ${corpus} > $pocolm_data_dir/dev.txt
+# head -n -$num_dev_sentences < ${corpus} > $pocolm_data_dir/train.txt
+cp train.txt $pocolm_data_dir/train.txt
+cp dev.txt $pocolm_data_dir/dev.txt
 
 POCOLM_PATH=${KALDI_ROOT}/tools/pocolm
 pushd ${POCOLM_PATH}
     # --max-memory=10G \
-    # --num-splits=1 \
     # --warm-start-ratio=1 \
     # --limit-unk-history=true \
-    # --fold-dev-into=train \
-    # --min-counts="train=1" \
-python scripts/train_lm.py \
-    ${pocolm_data_dir} ${order} ${lm_work_dir} ${unpruned_model_dir}
 
-python scripts/format_arpa_lm.py ${unpruned_model_dir} | gzip -c > $pocolm_arpa_file
-python scripts/get_data_prob.py $pocolm_data_dir/dev.txt $unpruned_model_dir 2>&1 | grep -F '[perplexity'
+python scripts/train_lm.py \
+  --limit-unk-history=${limit_unk_history} \
+  --num-splits=100 \
+  --fold-dev-into=train \
+  --min-counts="train=2" \
+  ${pocolm_data_dir} ${order} ${lm_work_dir} ${unpruned_model_dir}
+
+log_time python scripts/format_arpa_lm.py ${unpruned_model_dir} | gzip -c > $pocolm_arpa_file
+log_time python scripts/get_data_prob.py $pocolm_data_dir/dev.txt $unpruned_model_dir 2>&1 | grep -F '[perplexity'
 popd
