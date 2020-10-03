@@ -68,8 +68,9 @@ fi
 # i-vector
 if [ $stage -le 5 ]; then
     # data augment end extract hires mfcc
-    ./embeddings/ivector_data_prep.sh ${train} ${lang_dir} ${tri3} #${dataset}_sp_vp_hires #tri3_sp_ali || exit 1
-    ./embeddings/ivector_training.sh --nj ${nj_ivec_extract} --online_cmvn_iextractor ${online_cmvn_iextractor} ${train}_sp_vp_hires ${tri3} ${ivec_model} || exit 1
+    # ./embeddings/ivector_data_prep.sh ${train} ${lang_dir} ${tri3} #${dataset}_sp_vp_hires #tri3_sp_ali || exit 1
+    # ./embeddings/ivector_training.sh --nj ${nj_ivec_extract} --online_cmvn_iextractor ${online_cmvn_iextractor} ${train}_sp_vp_hires ${tri3} ${ivec_model} || exit 1
+    echo "skip i-vector"
 fi
 
 if [ $stage -le 6 ]; then
@@ -77,12 +78,14 @@ if [ $stage -le 6 ]; then
     ./embeddings/ivector_extract.sh ${train}_sp_vp_hires ${ivec_extractor} ${train}_sp_vp_hires/ivectors || exit 1
 fi
 
+
 if [ $stage -le 7 ]; then
-    # implicitely align on _sp and generate align lats on _sp_vp_lats
+    # use lores. implicitely align on _sp and generate align lats on _sp_vp_lats
     ./dnn/make_lang_chain.sh ${train}_sp_vp ${tri3} ${lang_dir} ${lang_chain} ${tree}
     ./dnn/tdnnf_tedlium_s5_r3.sh ${tree} ${mdl}
-    ./dnn/dnn_training.sh --train_stage ${train_stage} --num_epochs ${num_epochs} --n_gpu ${n_gpu} \
-        ${train} ${lat_dir} ${ivec_data} ${tree} ${mdl}
+    # train on hires
+    ./dnn/dnn_training.sh --train_stage ${train_stage} --num_epochs ${num_epochs} --n_gpu ${n_gpu} --remove_egs ${remove_egs} \
+        ${train}_sp_vp_hires ${lat_dir} ${ivec_data} ${tree} ${mdl}
 fi
 
 if [ $stage -eq 8 ]; then
