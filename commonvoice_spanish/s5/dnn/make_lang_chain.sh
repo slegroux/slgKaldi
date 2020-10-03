@@ -37,6 +37,11 @@ else
   log_time steps/nnet3/chain/gen_topo.py $nonsilphonelist $silphonelist >$lang_chain/topo
 fi
 
+if [ ! -f $dataset/feats.scp ]; then
+  log_info "compute mfcc for $dataset"
+  features/feature_extract.sh --feature_type "mfcc" --mfcc_config conf/mfcc.conf ${dataset}
+fi
+
 # Get the alignments as lattices (gives the chain training more freedom).
 # use the same num-jobs as the alignments
 
