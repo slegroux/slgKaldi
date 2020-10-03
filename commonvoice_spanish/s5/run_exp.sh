@@ -34,6 +34,7 @@ fi
 # G
 #  https://kaldi-asr.org/doc/data_prep.html#data_prep_grammar
 # TODO(slg): download corpus + pocolm
+
 if [ $stage -eq 2 ]; then
     # ./data_prep/prepare_text.sh ${corpus_train} ${lm_train}
     # ./data_prep/prepare_text.sh ${corpus_dev} ${lm_dev}
@@ -47,41 +48,63 @@ if [ $stage -eq 2 ]; then
 fi
 
 # FEATURES
-if [ $stage -eq 3 ]; then
+if [ $stage -le 3 ]; then
     for dataset in {${train},${test},${dev}}; do
         ./features/feature_extract.sh --feature_type "mfcc" --mfcc_config "conf/mfcc.conf" ${dataset} || exit 1
     done
 fi
 
 # HMM-GMM
-if [ $stage -eq 4 ]; then
+if [ $stage -le 4 ]; then
     # TODO(slg): figure out nj settings
-    ./hmm/monophone_training.sh --nj ${nj_mono} --boost-silence ${boost_silence} ${train} ${lm} ${mono} || exit 1
+    ./hmm/monophone_training.sh --nj ${nj_mono} --boost-silence ${boost_silence} --subset ${subset} ${train} ${lm} ${mono} || exit 1
     ./hmm/triphone_training.sh --boost-silence ${boost_silence} ${train} ${lm} ${mono}_ali ${tri1} || exit 1
     ./hmm/lda_mllt_training.sh ${train} ${lm} ${tri1}_ali ${tri2} || exit 1
     ./hmm/sat_training.sh ${train} ${lm} ${tri2}_ali ${tri3} || exit 1
-    # ./utils/data/subset_data_dir.sh ${test_set} 1000 ${test_set}_1000
-    ./hmm/am_testing.sh --mono false --compile_graph true ${test} ${lm} ${tri3} ${tri3}/graph || exit 1
+    # ./utils/data/subset_data_dir.sh ${test} 1000 ${test}_1000
+    # ./hmm/am_testing.sh --mono false --compile_graph true ${test}_1000 ${lm} ${tri3} ${tri3}/graph_test_1000 || exit 1
 fi
 
 # i-vector
-if [ $stage -eq 5 ]; then
+if [ $stage -le 5 ]; then
     # data augment end extract hires mfcc
-    ./embeddings/ivector_data_prep.sh ${train} ${lang} ${tri3} #${dataset}_sp_vp_hires #tri3_sp_ali || exit 1
+    ./embeddings/ivector_data_prep.sh ${train} ${lang_dir} ${tri3} #${dataset}_sp_vp_hires #tri3_sp_ali || exit 1
     ./embeddings/ivector_training.sh --nj ${nj_ivec_extract} --online_cmvn_iextractor ${online_cmvn_iextractor} ${train}_sp_vp_hires ${tri3} ${ivec_model} || exit 1
+fi
+
+if [ $stage -le 6 ]; then
+    ./data_augment/make_sp_vp_hires.sh ${train} # only needed if using pre-trained i-vector extractor. else stage 5 will provide it
     ./embeddings/ivector_extract.sh ${train}_sp_vp_hires ${ivec_extractor} ${train}_sp_vp_hires/ivectors || exit 1
 fi
 
-if [ $stage -eq 6 ]; then
+if [ $stage -le 7 ]; then
     # implicitely align on _sp and generate align lats on _sp_vp_lats
-    ./dnn/make_lang_chain.sh ${train}_sp_vp ${tri3} ${lang} ${lang_chain} ${tree}
+    ./dnn/make_lang_chain.sh ${train}_sp_vp ${tri3} ${lang_dir} ${lang_chain} ${tree}
     ./dnn/tdnnf_tedlium_s5_r3.sh ${tree} ${mdl}
     ./dnn/dnn_training.sh --train_stage ${train_stage} --num_epochs ${num_epochs} --n_gpu ${n_gpu} \
         ${train} ${lat_dir} ${ivec_data} ${tree} ${mdl}
-
-    # utils/copy_data_dir.sh ${test_set}_1000 ${test_set}_1000_hires
-    # ./features/feature_extract.sh --feature_type "mfcc" --mfcc_config conf/mfcc_hires.conf ${test_data}
-    # ./embeddings/ivector_extract.sh ${test_data} ${ivec_extractor} ${test_data}/ivectors
-    # ./dnn/dnn_testing.sh --compute_graph false ${test_data} ${lang_test} ${tree} ${graph} ${test_data}/ivectors ${mdl} ${decode_dir}
-
 fi
+
+if [ $stage -eq 8 ]; then
+    # extract feats for test set
+    utils/copy_data_dir.sh ${test} ${test}_hires
+    ./features/feature_extract.sh --feature_type "mfcc" --mfcc_config conf/mfcc_hires.conf ${test}_hires
+    ./embeddings/ivector_extract.sh ${test}_hires ${ivec_extractor} ${test}_hires/ivectors
+    ./dnn/dnn_testing.sh --compute_graph true ${test}_hires ${lang_test} ${tree} ${graph} ${test}_hires/ivectors ${mdl} ${decode_name}
+fi
+
+if [ $stage -eq 9 ]; then
+    if [ ! -d ${rnnlm_data} ]; then
+        mkdir -p ${rnnlm_data}
+    fi
+    for text in ${lm_dir}/{train,dev}.txt; do
+        cp ${text} ${rnnlm_data}
+    done
+
+    ./lm/train_lstm_tdnn_lm.sh --stage ${rnn_stage} --train_stage ${rnn_train_stage} \
+        --n_gpu ${rnn_gpu} --epochs ${rnn_epochs} \
+        ${rnnlm_dir} ${wordlist} ${rnnlm_data}
+
+    # ./lm/rescore.sh
+fi
+
