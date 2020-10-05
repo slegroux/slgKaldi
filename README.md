@@ -8,7 +8,7 @@
 # Easy Kaldi
 ## Description
 A collection of scripts based on [Kaldi](https://github.com/kaldi-asr/kaldi) for speech recognition, diarization & language modeling
-### Speech Recognition [asr](asr/README.md)
+### Speech Recognition [asr](asr)
 - 1. Data prep
 - 2. Lexicon generation
 - 3. Grammar generation (pocolm & srilm)
@@ -20,7 +20,7 @@ A collection of scripts based on [Kaldi](https://github.com/kaldi-asr/kaldi) for
 - 9. RNNLM training
 - 10. Rescoring
 
-### Diarization [diarization](diarization/README.md)
+### Diarization [diarization](diarization)
 - 1. i-vector (LIUM)
 - 2. x-vector (Kaldi)
 
