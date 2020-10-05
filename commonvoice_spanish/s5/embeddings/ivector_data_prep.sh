@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 # (c) 2020 Sylvain Le Groux <slegroux@ccrma.stanford.edu>
 
+# input:
+#  train
+# output:
+#  lores train_sp & train_sp_ali
+#  hires train_sp_vp_hires 
+
 set -euo pipefail
 
 online_cmvn_iextractor=false
@@ -15,7 +21,7 @@ tri3=$3
 
 nj=$(get_njobs $dataset)
 
-# speed perturb
+# speed perturb (for alignments)
 if [ ! -d ${dataset}_sp ]; then
   log_info "Speed perturb"
   ./data_augment/make_sp.sh ${dataset}
@@ -32,7 +38,10 @@ if [ ! -d ${tri3}_sp_ali ]; then
     ${dataset}_sp ${lang} ${tri3} ${tri3}_sp_ali
 fi
 
-# volume perturb
+# add volume perturb to sp (for training ivec on hires)
+# do volume-perturbation on the training data prior to extracting hires
+# features; this helps make trained nnets more invariant to test data volume.
+
 if [ ! -d ${dataset}_sp_vp ]; then
   log_info "Volume perturb: sp+vp -> mfcc"
   ./data_augment/make_vp.sh ${dataset}_sp

@@ -39,8 +39,9 @@ tree_dir=$4
 dir=$5
 
 #train_ivector_dir=data/${train_set}_x/xivectors
+log_info "train dnn"
 
-steps/nnet3/chain/train.py --stage=$train_stage \
+log_time steps/nnet3/chain/train.py --stage=$train_stage \
   --cmd="run.pl" \
   --feat.online-ivector-dir=${ivector_data} \
   --feat.cmvn-opts="--norm-means=false --norm-vars=false" \
@@ -56,7 +57,7 @@ steps/nnet3/chain/train.py --stage=$train_stage \
   --egs.chunk-width=$chunk_width \
   --trainer.num-chunk-per-minibatch=64 \
   --trainer.frames-per-iter=$frames_per_iter \
-  --trainer.num-epochs=$num_epochs \
+  --trainer.num-epochs=${num_epochs} \
   --trainer.optimization.num-jobs-initial=$n_gpu \
   --trainer.optimization.num-jobs-final=$n_gpu \
   --trainer.optimization.initial-effective-lrate=0.00025 \

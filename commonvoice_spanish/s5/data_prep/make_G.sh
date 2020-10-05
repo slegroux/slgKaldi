@@ -16,7 +16,6 @@ lang=$4
 lm_dir=$5
 
 
-
 if [ ! -d ${lm_dir} ]; then
     mkdir -p ${lm_dir}
 fi
@@ -24,8 +23,8 @@ fi
 # get rid of punc and keep segments with only 8<seq<16 words
 ./data_prep/subs_prepare_data.pl ${corpus} ${words} ${lm_dir}
 
-# generate 3g of in_vocabulary text
-./data_prep/prepare_lm.sh --unk "<UNK>" ${lm_dir}/in_vocabulary.txt ${lm_dir}
+# generate trigram of in_vocabulary text
+./data_prep/prepare_lm.sh --unk ${unk} ${lm_dir}/in_vocabulary.txt ${lm_dir}
 
 # generate language model G.fst
 utils/format_lm.sh \

@@ -1,132 +1,125 @@
 #!/usr/bin/env bash
 # (c) 2020 Sylvain Le Groux <slegroux@ccrma.stanford.edu>
+# TODO(slg): parallelize
 
 stage=0
+
+. cfg/es_commonvoice.cfg
 
 . utils.sh
 . path.sh
 . utils/parse_options.sh
 
-# conda activate slgasr
-# today=$(date +'%Y%m%d')
-today=20200927
-data=data/${today}
-exp=exp/${today}
+# DATA PREP
+# https://kaldi-asr.org/doc/data_prep.html
 
-if [ $stage -le 0 ]; then
-    # DATA
-    # TODO(slg): download data
-    cv_root=/home/syl20/data/es/commonvoice
-    for dataset in ${cv_root}/{train,test,dev}.tsv; do
+if [ $stage -eq 0 ]; then
+    for dataset in ${datasets}; do
         name=$(basename $dataset .tsv)
-        ./data_prep/format_commonvoice.py ${dataset} ${data}/${name} ||exit 1
+        if [ ! -d ${data}/${name} ]; then
+            ./data_prep/format_commonvoice.py ${dataset} ${data}/${name} ||exit 1
+        fi
     done
-
-    # L
-    # TODO(slg): letter-based lexicon (santiago)
-    lexicon="santiago.txt"
-    dict=${data}/dict
-    lang=${data}/lang
-    ./data_prep/make_L.sh ${lexicon} ${dict} ${lang} || exit 1
-
-    # G
-    # TODO(slg): download corpus + pocolm
-    lm_corpus="OpenSubtitles.en-es.es"
-    lm_dir=${data}/lm
-    ./data_prep/make_G.sh ${lm_corpus} ${lang}/words.txt ${dict} ${lang} ${lm_dir} || exit 1
 fi
 
-if [ $stage -le 1 ]; then
-    for dataset in ${data}/{train,test,dev}; do
+# L
+# https://kaldi-asr.org/doc/data_prep.html#data_prep_lang
+
+if [ $stage -eq 1 ]; then
+    ./data_prep/make_L.sh --unk ${unk} --lang ${lang} ${lexicon} ${dict} ${lang_dir} || exit 1
+    echo "number of non silent phones:" $(cat ${dict}/nonsilence_phones.txt|wc -l)
+    echo "vocabulary size: " $(cat ${lang_dir}/words.txt|wc -l)
+fi
+
+# G
+#  https://kaldi-asr.org/doc/data_prep.html#data_prep_grammar
+# TODO(slg): download corpus + pocolm
+
+if [ $stage -eq 2 ]; then
+    # ./data_prep/prepare_text.sh ${corpus_train} ${lm_train}
+    # ./data_prep/prepare_text.sh ${corpus_dev} ${lm_dev}
+
+    # ./lm/make_srilm.sh --unk ${unk} ${lm_train} ${lm_dir}
+    ./lm/make_pocolm.sh --order ${lm_order} --limit_unk_history ${limit_unk_history} \
+        ${lm_train} ${lm_dev} ${lm_dir}
+    utils/format_lm.sh \
+        ${lang_dir} ${lm_dir}/${lm_order}gram_unpruned.arpa.gz ${dict}/lexicon.txt \
+        ${lm}
+fi
+
+# FEATURES
+if [ $stage -le 3 ]; then
+    for dataset in {${train},${test},${dev}}; do
         ./features/feature_extract.sh --feature_type "mfcc" --mfcc_config "conf/mfcc.conf" ${dataset} || exit 1
     done
 fi
 
-if [ $stage -le 2 ]; then
-    train_set=${data}/train
-    test_set=${data}/test
-    dev_set=${data}/dev
-    lang_train=${data}/lang
-    lang_test=${data}/lang_test
-    mono=${exp}/mono
-    tri1=${exp}/tri1
-    tri2=${exp}/tri2
-    tri3=${exp}/tri3
-
-    # OPTIONAL: some utterances can be blacklisted
-    # filter_from_list ${data}/train/wav.scp ${data}/train/blacklist.txt
-
-    ./hmm/monophone_training.sh --nj 100 --boost-silence 1.0 --subset 5000 ${train_set} ${lang_train} ${mono}
-    ./hmm/triphone_training.sh --nj 100 --boost-silence 1.0 ${train_set} ${lang_train} ${mono}_ali ${tri1} || exit 1
-    ./hmm/lda_mllt_training.sh --nj 100 ${train_set} ${lang_train} ${tri1}_ali ${tri2} || exit 1
-    ./hmm/sat_training.sh --nj 100 ${train_set} ${lang_train} ${tri2}_ali ${tri3} || exit 1
-    ./utils/data/subset_data_dir.sh ${test_set} 1000 ${test_set}_1000
-    ./hmm/am_testing.sh --mono false --compile_graph true ${test_set}_1000 ${lang_test} ${tri3} ${tri3}/graph || exit 1
-
-fi
-
-# if [ $stage -le 3 ]; then
-#     rir_dir=/home/syl20/data/rir/RIRS_NOISES
-#     musan_dir=/home/syl20/data/noise/musan
-#     train_set=${data}/train
-#     ./data_augment/make_sp.sh ${train_set} || exit 1
-#     ./data_augment/make_vp.sh ${train_set} || exit 1
-#     ./data_augment/make_rvb.sh ${rir_dir} ${train_set} || exit 1
-#     ./data_augment/make_noise_music_babble.sh --sampling_rate 16000 ${musan_dir} ${train_set} || exit 1
-#     ./utils/combine_data.sh ${train_set}_combined ${train_set}{_sp,_vp,_rvb,_aug} || exit 1
-# fi
-
+# HMM-GMM
 if [ $stage -le 4 ]; then
-    dataset=${data}/train
-    lang=${data}/lang
-    tri3=${exp}/tri3
-    online_cmvn_iextractor=false
-    ivec_model=${exp}/ivector_mdl
-    ivec_extractor=${ivec_model}/extractor
-    nj=6 #c.f. ivec train script (nj*threads*)
-    ./embeddings/ivector_data_prep.sh ${dataset} ${lang} ${tri3} #${dataset}_sp_vp_hires #tri3_500_sp_ali || exit 1
-    ./embeddings/ivector_training.sh --nj ${nj} --online_cmvn_iextractor ${online_cmvn_iextractor} ${dataset}_sp_vp_hires ${tri3} ${ivec_model} || exit 1
-    ./embeddings/ivector_extract.sh ${dataset}_sp_vp_hires ${ivec_extractor} ${dataset}_sp_vp_hires/ivectors || exit 1
+    # TODO(slg): figure out nj settings
+    ./hmm/monophone_training.sh --nj ${nj_mono} --boost-silence ${boost_silence} --subset ${subset} ${train} ${lm} ${mono} || exit 1
+    ./hmm/triphone_training.sh --boost-silence ${boost_silence} ${train} ${lm} ${mono}_ali ${tri1} || exit 1
+    ./hmm/lda_mllt_training.sh ${train} ${lm} ${tri1}_ali ${tri2} || exit 1
+    ./hmm/sat_training.sh ${train} ${lm} ${tri2}_ali ${tri3} || exit 1
+    # ./utils/data/subset_data_dir.sh ${test} 1000 ${test}_1000
+    # ./hmm/am_testing.sh --mono false --compile_graph true ${test}_1000 ${lm} ${tri3} ${tri3}/graph_test_1000 || exit 1
 fi
 
+# i-vector training & extract
 if [ $stage -le 5 ]; then
-    # basic data
-    dataset=${data}/train
+    # data augment end extract hires mfcc
+    # input: ${dataset} => output: ${dataset]_sp tri3_sp_ali ${dataset}_sp_vp_hires
+    ./embeddings/ivector_data_prep.sh ${train} ${lang_dir} ${tri3}
+    # input: hires (sp_vp_hires) data => output exp/ivector_extractor and ${dataset}_sp_vp_hires/ivector_data
+    ./embeddings/ivector_training.sh --nj ${nj_ivec_extract} --online_cmvn_iextractor ${online_cmvn_iextractor} ${train}_sp_vp_hires ${tri3} ${ivec_model} || exit 1
+    # echo "skip i-vector training"
+fi
 
-    # lang
-    lang=${data}/lang
-    lang_test=${data}/lang_test
-    lang_chain=${data}/lang_chain
-    # am
-    tri3=${exp}/tri3
-    # ivectors
-    train_data=${dataset}_sp_vp_hires
-    ivector_data=${train_data}/ivectors
+# pre-trained i-vectors
+if [ $stage -le 6 ]; then
+    ./data_augment/make_sp_vp_hires.sh ${train} # only needed if using pre-trained i-vector extractor. else stage 5 will provide it
+    ./embeddings/ivector_extract.sh ${train}_sp_vp_hires ${ivec_extractor} ${train}_sp_vp_hires/ivectors || exit 1
+fi
 
-    lat_dir=${tri3}_sp_vp_ali_lats
-    ivec_model=${exp}/ivector_mdl
-    ivec_extractor=${ivec_model}/extractor
-    # dnn-mdl
-    tree=${exp}/chain/tree #TODO(sylvain): change to chain2
-    graph=${exp}/chain/tree/graph_tgsmall
-    mdl=${exp}/chain/tdnnf_tedlium
-    # training
-    train_stage=-10
-    num_epochs=5
-    n_gpu=8
-
-    # implicitely align on train_500_sp and generate align lats on sp_vp_lats
-    # ./dnn/make_lang_chain.sh ${dataset}_sp_vp ${tri3} ${lang} ${lang_chain} ${tree}
+if [ $stage -le 7 ]; then
+    # use lores (_sp) implicitely align on _sp and generate align lats on _sp_lats
+    # ./dnn/make_lang_chain.sh ${train}_sp ${tri3} ${lang_dir} ${lang_chain} ${tree}
     # ./dnn/tdnnf_tedlium_s5_r3.sh ${tree} ${mdl}
-    # ./dnn/dnn_training.sh --train_stage ${train_stage} --num_epochs $num_epochs --n_gpu $n_gpu \
-    #     ${train_data} ${lat_dir} ${ivector_data} ${tree} ${mdl}
+    # train on hires (_sp_vp_hires)
+    ./dnn/dnn_training.sh --train_stage ${train_stage} --n_gpu ${n_gpu} --num_epochs ${num_epochs} --remove_egs ${remove_egs} \
+        ${train}_sp_vp_hires ${lat_dir} ${ivec_data} ${tree} ${mdl}
+    # ./dnn/plot_error_curve.py ${mdl}/accuracy.report
+fi
 
-    test_set=${data}/test
-    test_data=${test_set}_1000_hires
-    decode_dir=decode_1000_tg # needs to be a subset of model dir
-    # utils/copy_data_dir.sh ${test_set}_1000 ${test_set}_1000_hires
-    # ./features/feature_extract.sh --feature_type "mfcc" --mfcc_config conf/mfcc_hires.conf ${test_data}
-    # ./embeddings/ivector_extract.sh ${test_data} ${ivec_extractor} ${test_data}/ivectors
-    ./dnn/dnn_testing.sh --compute_graph false ${test_data} ${lang_test} ${tree} ${graph} ${test_data}/ivectors ${mdl} ${decode_dir}
+if [ $stage -le 8 ]; then
+    # extract feats for test set
+    utils/copy_data_dir.sh ${test} ${test}_hires
+    ./features/feature_extract.sh --feature_type "mfcc" --mfcc_config conf/mfcc_hires.conf ${test}_hires
+    ./embeddings/ivector_extract.sh ${test}_hires ${ivec_extractor} ${test}_hires/ivectors
+    # decode folder: decode_"lm_name"_"test_data"
+    ./dnn/dnn_testing.sh --compute_graph true ${test}_hires ${lang_test} ${tree} ${graph} ${test}_hires/ivectors ${mdl} ${decode_test_name}
+    ./dnn/dnn_testing.sh --compute_graph false ${test}_hires ${lang_test} ${tree} ${graph} ${test}_hires/ivectors ${mdl} ${decode_test_name}
+fi
 
+if [ $stage -le 9 ]; then
+    if [ ! -d ${rnnlm_data} ]; then
+        mkdir -p ${rnnlm_data}
+    fi
+    for text in ${lm_dir}/{train,dev}.txt; do
+        cp ${text} ${rnnlm_data}
+    done
+
+    ./lm/train_lstm_tdnn_lm.sh --stage ${rnn_stage} --train_stage ${rnn_train_stage} \
+        --n_gpu ${rnn_gpu} --epochs ${rnn_epochs} \
+        ${rnnlm_dir} ${wordlist} ${rnnlm_data}
+fi
+
+if [ $stage -le 10 ]; then
+    ./rescoring/rescore_pruned.sh --ngram-order ${rescore_ngram_order} ${lm} ${rnnlm_dir} ${rnnlm_test} ${decode_og} ${decode_rnnlm}
+fi
+
+if [ $stage -le 11 ]; then
+    ./steps/nnet3/report/generate_plots.py --is-chain true ${mdl} ${mdl}/report/
+    # copy report locally
+    # scp syl20@172.21.150.75:/home/syl20/kaldi-gc/kaldi_egs/commonvoice_spanish/s5/experiments/es/commonvoice/exp/chain/tdnnf_tedlium/report/{log_probability_output,log_probability_output-xent}.pdf .
 fi
