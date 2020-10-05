@@ -65,38 +65,43 @@ if [ $stage -le 4 ]; then
     # ./hmm/am_testing.sh --mono false --compile_graph true ${test}_1000 ${lm} ${tri3} ${tri3}/graph_test_1000 || exit 1
 fi
 
-# i-vector
+# i-vector training & extract
 if [ $stage -le 5 ]; then
     # data augment end extract hires mfcc
-    # ./embeddings/ivector_data_prep.sh ${train} ${lang_dir} ${tri3} #${dataset}_sp_vp_hires #tri3_sp_ali || exit 1
-    # ./embeddings/ivector_training.sh --nj ${nj_ivec_extract} --online_cmvn_iextractor ${online_cmvn_iextractor} ${train}_sp_vp_hires ${tri3} ${ivec_model} || exit 1
-    echo "skip i-vector"
+    # input: ${dataset} => output: ${dataset]_sp tri3_sp_ali ${dataset}_sp_vp_hires
+    ./embeddings/ivector_data_prep.sh ${train} ${lang_dir} ${tri3}
+    # input: hires (sp_vp_hires) data => output exp/ivector_extractor and ${dataset}_sp_vp_hires/ivector_data
+    ./embeddings/ivector_training.sh --nj ${nj_ivec_extract} --online_cmvn_iextractor ${online_cmvn_iextractor} ${train}_sp_vp_hires ${tri3} ${ivec_model} || exit 1
+    # echo "skip i-vector training"
 fi
 
+# pre-trained i-vectors
 if [ $stage -le 6 ]; then
     ./data_augment/make_sp_vp_hires.sh ${train} # only needed if using pre-trained i-vector extractor. else stage 5 will provide it
     ./embeddings/ivector_extract.sh ${train}_sp_vp_hires ${ivec_extractor} ${train}_sp_vp_hires/ivectors || exit 1
 fi
 
-
 if [ $stage -le 7 ]; then
-    # use lores. implicitely align on _sp and generate align lats on _sp_vp_lats
-    ./dnn/make_lang_chain.sh ${train}_sp_vp ${tri3} ${lang_dir} ${lang_chain} ${tree}
-    ./dnn/tdnnf_tedlium_s5_r3.sh ${tree} ${mdl}
-    # train on hires
-    ./dnn/dnn_training.sh --train_stage ${train_stage} --num_epochs ${num_epochs} --n_gpu ${n_gpu} --remove_egs ${remove_egs} \
+    # use lores (_sp) implicitely align on _sp and generate align lats on _sp_lats
+    # ./dnn/make_lang_chain.sh ${train}_sp ${tri3} ${lang_dir} ${lang_chain} ${tree}
+    # ./dnn/tdnnf_tedlium_s5_r3.sh ${tree} ${mdl}
+    # train on hires (_sp_vp_hires)
+    ./dnn/dnn_training.sh --train_stage ${train_stage} --n_gpu ${n_gpu} --num_epochs ${num_epochs} --remove_egs ${remove_egs} \
         ${train}_sp_vp_hires ${lat_dir} ${ivec_data} ${tree} ${mdl}
+    # ./dnn/plot_error_curve.py ${mdl}/accuracy.report
 fi
 
-if [ $stage -eq 8 ]; then
+if [ $stage -le 8 ]; then
     # extract feats for test set
     utils/copy_data_dir.sh ${test} ${test}_hires
     ./features/feature_extract.sh --feature_type "mfcc" --mfcc_config conf/mfcc_hires.conf ${test}_hires
     ./embeddings/ivector_extract.sh ${test}_hires ${ivec_extractor} ${test}_hires/ivectors
-    ./dnn/dnn_testing.sh --compute_graph true ${test}_hires ${lang_test} ${tree} ${graph} ${test}_hires/ivectors ${mdl} ${decode_name}
+    # decode folder: decode_"lm_name"_"test_data"
+    ./dnn/dnn_testing.sh --compute_graph true ${test}_hires ${lang_test} ${tree} ${graph} ${test}_hires/ivectors ${mdl} ${decode_test_name}
+    ./dnn/dnn_testing.sh --compute_graph false ${test}_hires ${lang_test} ${tree} ${graph} ${test}_hires/ivectors ${mdl} ${decode_test_name}
 fi
 
-if [ $stage -eq 9 ]; then
+if [ $stage -le 9 ]; then
     if [ ! -d ${rnnlm_data} ]; then
         mkdir -p ${rnnlm_data}
     fi
@@ -107,7 +112,9 @@ if [ $stage -eq 9 ]; then
     ./lm/train_lstm_tdnn_lm.sh --stage ${rnn_stage} --train_stage ${rnn_train_stage} \
         --n_gpu ${rnn_gpu} --epochs ${rnn_epochs} \
         ${rnnlm_dir} ${wordlist} ${rnnlm_data}
+fi
 
-    # ./lm/rescore.sh
+if [ $stage -le 10 ]; then
+    ./rescoring/rescore_pruned.sh --ngram-order ${rescore_ngram_order} ${lm} ${rnnlm_dir} ${rnnlm_test} ${decode_og} ${decode_rnnlm}
 fi
 
