@@ -8,13 +8,14 @@ num_leaves=3500
 . path.sh
 . utils/parse_options.sh
 
-dataset=$1
+dataset=$1 # lores train_sp
 tri3=$2
 lang=$3
 lang_chain=$4
 tree_dir=$5
 
 nj=$(get_njobs $dataset)
+
 
 log_info "Create lang directory with chain-type topology"
 # Create a version of the lang/ directory that has one state per phone in the
@@ -47,8 +48,8 @@ fi
 
 log_info "Get alignments as lattices"
 log_time steps/align_fmllr_lats.sh --nj ${nj} --cmd "run.pl" ${dataset} \
-  ${lang} ${tri3} ${tri3}_sp_vp_ali_lats
-rm ${tri3}_sp_vp_ali_lats/fsts.*.gz # save space
+  ${lang} ${tri3} ${tri3}_sp_ali_lats
+rm ${tri3}_sp_ali_lats/fsts.*.gz # save space
 
 
 # Build a tree using our new topology.  We know we have alignments for the
@@ -61,9 +62,11 @@ if [ -f $tree_dir/final.mdl ]; then
 fi
 
 if [ ! -f ${tri3}_sp_ali/ali.1.gz ]; then
-  echo "$0: expected align file $f to exist" && exit 1
+  log_info "compute sp alignemnts for tree building"
+  log_time steps/align_fmllr.sh --nj $nj \
+    ${dataset} ${lang} ${tri3} ${tri3}_sp_ali
 fi
-# note we use sp_ali not sp_vp_ali_lats
+
 steps/nnet3/chain/build_tree.sh \
   --frame-subsampling-factor 3 \
   --context-opts "--context-width=2 --central-position=1" \

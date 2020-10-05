@@ -3,7 +3,6 @@
 # train on hires data
 
 set -euo pipefail
-set -x
 
 train_stage=-10
 num_epochs=5
