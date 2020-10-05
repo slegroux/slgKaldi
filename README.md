@@ -4,9 +4,9 @@
 [![made-with-VSCode](https://img.shields.io/badge/Made%20for-VSCode-1f425f.svg)](https://code.visualstudio.com/)
 [![Generic badge](https://img.shields.io/badge/Made%20for-Kaldi-1f425f.svg)](https://shields.io/)
 
-# Easy Kaldi
+# Kaldeasy
 ## Description
-A collection of scripts based on Kaldi for speech recognition, diarization & language modeling
+A collection of scripts based on (https://github.com/kaldi-asr/kaldi)[Kaldi] for speech recognition, diarization & language modeling
 - 1. Data prep
 - 2. Lexicon generation
 - 3. Grammar generation (pocolm & srilm)
