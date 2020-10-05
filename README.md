@@ -4,8 +4,19 @@
 [![made-with-VSCode](https://img.shields.io/badge/Made%20for-VSCode-1f425f.svg)](https://code.visualstudio.com/)
 [![Generic badge](https://img.shields.io/badge/Made%20for-Kaldi-1f425f.svg)](https://shields.io/)
 
-# Kaldi recipes
+# Easy Kaldi
 ## Description
-A collection of Kaldi recipes for speech recognition, diarization & language modeling
+A collection of scripts based on Kaldi for speech recognition, diarization & language modeling
+- 1. Data prep
+- 2. Lexicon generation
+- 3. Grammar generation (pocolm & srilm)
+- 4. Feature extraction
+- 5. HMM-GMM training
+- 6. Data augmentation (speed, volume, reverb, music, noise, babble)
+- 7. Embedding (i-vector, x-vector)
+- 8. DNN training
+- 9. RNNLM training
+- 10. Rescoring
+
 ## Authors
-<slegroux@ccrma.stanford.edu> 2020
+(c) 2020 Sylvain Le Groux <slegroux@ccrma.stanford.edu>
