@@ -39,7 +39,7 @@ if [ $stage -eq 2 ]; then
     # ./data_prep/prepare_text.sh ${corpus_train} ${lm_train}
     # ./data_prep/prepare_text.sh ${corpus_dev} ${lm_dev}
 
-    ./lm/make_srilm.sh --unk ${unk} ${lm_train} ${lm_dir}
+    # ./lm/make_srilm.sh --unk ${unk} ${lm_train} ${lm_dir}
     ./lm/make_pocolm.sh --order ${lm_order} --limit_unk_history ${limit_unk_history} \
         ${lm_train} ${lm_dev} ${lm_dir}
     utils/format_lm.sh \
@@ -118,3 +118,8 @@ if [ $stage -le 10 ]; then
     ./rescoring/rescore_pruned.sh --ngram-order ${rescore_ngram_order} ${lm} ${rnnlm_dir} ${rnnlm_test} ${decode_og} ${decode_rnnlm}
 fi
 
+if [ $stage -le 11 ]; then
+    ./steps/nnet3/report/generate_plots.py --is-chain true ${mdl} ${mdl}/report/
+    # copy report locally
+    # scp syl20@172.21.150.75:/home/syl20/kaldi-gc/kaldi_egs/commonvoice_spanish/s5/experiments/es/commonvoice/exp/chain/tdnnf_tedlium/report/{log_probability_output,log_probability_output-xent}.pdf .
+fi

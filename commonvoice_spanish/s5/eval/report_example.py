@@ -26,8 +26,9 @@ import numpy as np
 # script more than once).
 # model1 = convert_model.read_model("exp/chain/tdnn1g_sp/24.mdl")
 # model2 = convert_model.read_model("exp/chain/tdnn1g_sp/25.mdl")
-model1 = pickle.load(open("exp/chain/tdnn1g_sp/24.mdl.pkl", "rb"))
-model2 = pickle.load(open("exp/chain/tdnn1g_sp/25.mdl.pkl", "rb"))
+MODEL_DIR="experiments/es/commonvoice/exp/chain/tdnnf_tedlium/"
+model1 = pickle.load(open(MODEL_DIR + "/600.mdl.pkl", "rb"))
+model2 = pickle.load(open(MODEL_DIR + "/700.mdl.pkl", "rb"))
 
 convert_model.compute_derived_quantities(model1)
 convert_model.compute_derived_quantities(model2)
