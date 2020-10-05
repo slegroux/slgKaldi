@@ -5,7 +5,7 @@
 [![made-with-VSCode](https://img.shields.io/badge/Made%20for-VSCode-1f425f.svg)](https://code.visualstudio.com/)
 [![Generic badge](https://img.shields.io/badge/Made%20for-Kaldi-1f425f.svg)](https://shields.io/)
 
-# Kaldeasy
+# ASR
 ## Description
 A collection of scripts for speech recognition based on [Kaldi](https://github.com/kaldi-asr/kaldi) and meant to simplify the training process as much as possible.
 
@@ -25,8 +25,8 @@ A collection of scripts for speech recognition based on [Kaldi](https://github.c
 ## Datasets
 | English | Spanish |
 | --- | --- |
-| common voice | common voice |
-| | heroico |
+| [common voice](https://commonvoice.mozilla.org/en/datasets) | [common voice](https://commonvoice.mozilla.org/en/datasets) |
+| | [heroico](https://www.openslr.org/resources.php) |
 | | dimex |
 
 
