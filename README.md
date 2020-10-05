@@ -5,10 +5,10 @@
 [![made-with-VSCode](https://img.shields.io/badge/Made%20for-VSCode-1f425f.svg)](https://code.visualstudio.com/)
 [![Generic badge](https://img.shields.io/badge/Made%20for-Kaldi-1f425f.svg)](https://shields.io/)
 
-# Kaldeasy
+# Easy Kaldi
 ## Description
 A collection of scripts based on [Kaldi](https://github.com/kaldi-asr/kaldi) for speech recognition, diarization & language modeling
-### Speech Recognition [a relative link](other_file.md)
+### Speech Recognition [asr](asr/README.md)
 - 1. Data prep
 - 2. Lexicon generation
 - 3. Grammar generation (pocolm & srilm)
@@ -20,30 +20,19 @@ A collection of scripts based on [Kaldi](https://github.com/kaldi-asr/kaldi) for
 - 9. RNNLM training
 - 10. Rescoring
 
-### Diarization [a relative link](other_file.md)
+### Diarization [diarization(diarization/README.md)
+- 1. i-vector (LIUM)
+- 2. x-vector (Kaldi)
 
 ## Installation
 ### Dependencies
-- depends on: Kaldi & slgasr
-- dependencies can be installed using [conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/)
-``` bash
-```
-### Pretrained models
-- pre-trained models from Spacy should be downloaded as such:
-    - python -m spacy download es_core_news_sm
-    - python -m spacy download en_core_web_sm
+- depends on: [Kaldi](https://github.com/kaldi-asr/kaldi) & [slgasr](https://github.com/slegroux/slgasr)
+- Refer to respective projects for install info
 
-## Datasets
-### English
-- commonvoice
-### Spanish
-- commonvoice
-- heroico
-- dimex
-
-## Usage
-```bash
-```
+## Pretrained models
+- ASR
+- Diarization
+  
 
 ## License
 [GPL](https://www.gnu.org/licenses/gpl-3.0-standalone.html)
