@@ -20,7 +20,7 @@ A collection of scripts based on [Kaldi](https://github.com/kaldi-asr/kaldi) for
 - 9. RNNLM training
 - 10. Rescoring
 
-### Diarization [diarization(diarization/README.md)
+### Diarization [diarization](diarization/README.md)
 - 1. i-vector (LIUM)
 - 2. x-vector (Kaldi)
 
