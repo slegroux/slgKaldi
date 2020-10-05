@@ -6,7 +6,7 @@
 
 # Kaldeasy
 ## Description
-A collection of scripts based on (https://github.com/kaldi-asr/kaldi)[Kaldi] for speech recognition, diarization & language modeling
+A collection of scripts based on [Kaldi](https://github.com/kaldi-asr/kaldi) for speech recognition, diarization & language modeling
 - 1. Data prep
 - 2. Lexicon generation
 - 3. Grammar generation (pocolm & srilm)
