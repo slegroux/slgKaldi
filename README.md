@@ -29,10 +29,11 @@ A collection of scripts based on [Kaldi](https://github.com/kaldi-asr/kaldi) for
 - depends on: [Kaldi](https://github.com/kaldi-asr/kaldi) & [slgasr](https://github.com/slegroux/slgasr)
 - Refer to respective projects for install info
 
+## Free Datasets
+- [OpenSLR](https://www.openslr.org/resources.php)
+
 ## Pretrained models
-- ASR
-- Diarization
-  
+- [kaldi-asr](http://kaldi-asr.org/models.html)  
 
 ## License
 [GPL](https://www.gnu.org/licenses/gpl-3.0-standalone.html)
