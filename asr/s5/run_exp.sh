@@ -4,27 +4,38 @@
 
 stage=0
 
-. cfg/es_commonvoice.cfg
+# . cfg/mini_librispeech
 
 . utils.sh
 . path.sh
 . utils/parse_options.sh
 
+config=$1
+source ${config}
+
 # DATA PREP
 # https://kaldi-asr.org/doc/data_prep.html
-
 if [ $stage -eq 0 ]; then
+    # commonvoice
+    # for dataset in ${datasets}; do
+    #     name=$(basename $dataset .tsv)
+    #     if [ ! -d ${data}/${name} ]; then
+    #         ./data_prep/format_commonvoice.py ${dataset} ${data}/${name} ||exit 1
+    #     fi
+    # done
+
+    # librispeech
     for dataset in ${datasets}; do
-        name=$(basename $dataset .tsv)
+        name=$(echo $(basename $dataset) | sed 's:-:_:g')
         if [ ! -d ${data}/${name} ]; then
-            ./data_prep/format_commonvoice.py ${dataset} ${data}/${name} ||exit 1
+            ./data_prep/format_librispeech.py "${dataset}/*/*/*.flac" "${dataset}/*/*/*.trans.txt" "${data}/${name}"
+            ./utils/fix_data_dir.sh ${data}/${name}
         fi
     done
 fi
 
 # L
 # https://kaldi-asr.org/doc/data_prep.html#data_prep_lang
-
 if [ $stage -eq 1 ]; then
     ./data_prep/make_L.sh --unk ${unk} --lang ${lang} ${lexicon} ${dict} ${lang_dir} || exit 1
     echo "number of non silent phones:" $(cat ${dict}/nonsilence_phones.txt|wc -l)
@@ -34,12 +45,15 @@ fi
 # G
 #  https://kaldi-asr.org/doc/data_prep.html#data_prep_grammar
 # TODO(slg): download corpus + pocolm
-
 if [ $stage -eq 2 ]; then
-    # ./data_prep/prepare_text.sh ${corpus_train} ${lm_train}
-    # ./data_prep/prepare_text.sh ${corpus_dev} ${lm_dev}
+    ./data_prep/prepare_text.sh ${corpus_train} ${lm_train}
+    ./data_prep/prepare_text.sh ${corpus_dev} ${lm_dev}
 
     # ./lm/make_srilm.sh --unk ${unk} ${lm_train} ${lm_dir}
+    # utils/format_lm.sh \
+    #     ${lang_dir} ${lm_dir}/${lm_order}-gram-srilm.arpa.gz ${dict}/lexicon.txt \
+    #     ${lm}
+
     ./lm/make_pocolm.sh --order ${lm_order} --limit_unk_history ${limit_unk_history} \
         ${lm_train} ${lm_dev} ${lm_dir}
     utils/format_lm.sh \
@@ -47,9 +61,10 @@ if [ $stage -eq 2 ]; then
         ${lm}
 fi
 
+
 # FEATURES
-if [ $stage -le 3 ]; then
-    for dataset in {${train},${test},${dev}}; do
+if [ $stage -eq 3 ]; then
+    for dataset in {${train},${test}}; do
         ./features/feature_extract.sh --feature_type "mfcc" --mfcc_config "conf/mfcc.conf" ${dataset} || exit 1
     done
 fi

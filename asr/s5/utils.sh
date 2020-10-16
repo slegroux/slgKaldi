@@ -22,17 +22,22 @@ log_time(){
     end=$(date +%s)
     runtime=$((end-start))
     echo "[CMD] $@" | tee -a $LOG_FILE
-    echo "[RUNTIME] $(date -d@${runtime} -u +%H:%M:%S)" | tee -a $LOG_FILE
+    echo "[RUNTIME] $(date -d@${runtime} -u +%H:%M:%S)" | tee -a ${EXP_LOG}
 }
 
 log_info(){
     msg=$1
-    echo -e "\n[INFO] $(date +'%Y-%m-%d-%H-%M-%S')" $msg | tee -a $LOG_FILE
+    echo -e "\n[INFO] $(date +'%Y-%m-%d-%H-%M-%S')" $msg | tee -a ${EXP_LOG}
 }
 
 log_wer(){
     decode_dir=$1
-    echo "[WER]" $(grep WER ${decode_dir}/wer_* | utils/best_wer.sh) | tee -a $LOG_FILE
+    echo "[WER]" $(grep WER ${decode_dir}/wer_* | utils/best_wer.sh) | tee -a ${EXP_LOG}
+}
+
+log_debug(){
+    log_dir=$1
+    echo "[LOG] Kaldi logs for this task: ${log_dir}" | tee -a ${EXP_LOG}
 }
 
 filter_from_list(){
