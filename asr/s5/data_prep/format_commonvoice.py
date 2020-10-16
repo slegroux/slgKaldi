@@ -6,6 +6,9 @@ from slgasr.data import ASRDatasetCSV
 from pathlib import Path
 from IPython import embed
 
+# train/test/dev.tsv: client_id | path | sentence | up_votes | down_votes | age | gender | accent
+# audio: common_voice_es_id.mp3
+
 @click.command()
 @click.argument("src", default="/home/syl20/data/es/commonvoice/test.tsv")
 @click.argument("dst", default="/tmp/es/commonvoice/test")
@@ -16,7 +19,7 @@ def format_commonvoice(src, dst, lang):
     formatted_dataset_path = Path(dst)
     audio_path = dataset_path.parent / "clips"
     ds = ASRDatasetCSV(dataset_path, lang=lang, prepend_audio_path=str(audio_path.absolute()))
-    ds.export2kaldi(str(formatted_dataset_path))
+    ds.export2kaldi(str(formatted_dataset_path), ext='flac')
 
 if __name__ == "__main__":
     format_commonvoice()
