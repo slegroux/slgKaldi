@@ -36,22 +36,22 @@ mkdir -p $lm_work_dir
 # num_dev_sentences=$(echo "$(cat ${corpus} | wc -l) * 20 / 100" | bc)
 # tail -n $num_dev_sentences < ${corpus} > $pocolm_data_dir/dev.txt
 # head -n -$num_dev_sentences < ${corpus} > $pocolm_data_dir/train.txt
-cp train.txt $pocolm_data_dir/train.txt
-cp dev.txt $pocolm_data_dir/dev.txt
+cp ${train} $pocolm_data_dir/train.txt
+cp ${dev} $pocolm_data_dir/dev.txt
 
 POCOLM_PATH=${KALDI_ROOT}/tools/pocolm
 pushd ${POCOLM_PATH}
-    # --max-memory=10G \
-    # --warm-start-ratio=1 \
-    # --limit-unk-history=true \
 
-python scripts/train_lm.py \
+python2 scripts/train_lm.py \
   --limit-unk-history=${limit_unk_history} \
   --num-splits=100 \
   --fold-dev-into=train \
+  --warm-start-ratio=1 \
   --min-counts="train=2" \
   ${pocolm_data_dir} ${order} ${lm_work_dir} ${unpruned_model_dir}
 
-log_time python scripts/format_arpa_lm.py ${unpruned_model_dir} | gzip -c > $pocolm_arpa_file
-log_time python scripts/get_data_prob.py $pocolm_data_dir/dev.txt $unpruned_model_dir 2>&1 | grep -F '[perplexity'
+log_time python2 scripts/format_arpa_lm.py ${unpruned_model_dir} | gzip -c > $pocolm_arpa_file
+log_time python2 scripts/get_data_prob.py $pocolm_data_dir/dev.txt $unpruned_model_dir 2>&1 | grep -F '[perplexity'
 popd
+
+exit 0
