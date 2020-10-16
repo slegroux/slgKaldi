@@ -16,9 +16,13 @@ tmp=$(mktemp -d /tmp/lang-XXXX) #data/local/lang
 
 log_info "Prepare dict"
 if [ $lang == 'es' ]; then
+    log_info "spanish"
     log_time ./data_prep/es_prepare_dict.sh --unk ${unk} ${lexicon} ${dict}
+elif [ $lang == 'en' ]; then
+    log_info "english"
+    log_time ./data_prep/en_prepare_dict.sh --unk ${unk} ${lexicon} ${dict}
 else
-    echo "[ERROR] langauge not supported"
+    echo "[ERROR] language not supported"
 fi
 
 log_info "Prepare lang"
