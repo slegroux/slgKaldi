@@ -24,17 +24,18 @@ fi
 log_info "Feature extraction njobs: $nj"
 
 if [ "$feature_type" == "mfcc" ]; then
-  log_info "MFCC extraction"
+  log_info "MFCC"
   log_time steps/make_mfcc.sh --mfcc-config ${mfcc_config} --nj $nj ${dataset}
+  log_info "CMVN"
   log_time steps/compute_cmvn_stats.sh ${dataset}
 
 elif [ "$feature_type" == "plp" ]; then
-
-  log_info "PLP extraction"
+  log_info "PLP"
   log_time steps/make_plp.sh --plp-config ${plp_config} --nj $nj ${dataset} 
+  log_info "CMVN"
   log_time steps/compute_cmvn_stats.sh ${dataset}
 else
-  log_info "Feature ${feature_type} is not supported"
+  log_err "Feature ${feature_type} is not supported"
 fi
 
 utils/fix_data_dir.sh ${dataset}
