@@ -10,9 +10,9 @@ from IPython import embed
 #   speakerid-chapter-uttid text
 
 @click.command()
-@click.argument("audio_path", default="/home/syl20/data/en/librispeech/LibriSpeech/train-clean-5/*/*/*.flac")
-@click.argument("transcript_path", default="/home/syl20/data/en/librispeech/LibriSpeech/train-clean-5/*/*/*.trans.txt")
-@click.argument("dst_path", default="experiments/en/minilibrispeech/data/train_clean_5")
+@click.argument("audio_path", default="/home/syl20/data/en/librispeech/LibriSpeech/dev-clean-2/*/*/*.flac")
+@click.argument("transcript_path", default="/home/syl20/data/en/librispeech/LibriSpeech/dev-clean-2/*/*/*.trans.txt")
+@click.argument("dst_path", default="experiments/en/minilibrispeech/data/dev_clean_2")
 @click.option("--lang", default="en")
 
 def format_libri(audio_path, transcript_path, dst_path, lang):
