@@ -37,6 +37,8 @@ else
     --config ${mono_config} \
     ${dataset} ${lang} ${mono}
 fi
+log_debug ${mono}
 
 log_info "Align MonoPhone"
 log_time steps/align_si.sh --nj $nj --boost-silence ${boost_silence} ${dataset} ${lang} ${mono} ${mono}_ali
+log_debug ${mono_ali}
