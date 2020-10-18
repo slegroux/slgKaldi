@@ -3,10 +3,11 @@
 
 import pandas as pd
 from matplotlib import pyplot as plt
-# from IPython import embed
+import sys
+from pathlib import Path
 
-fn = "/home/syl20/kaldi-gc/kaldi_egs/commonvoice_spanish/s5/experiments/es/commonvoice/exp/chain/tdnnf_tedlium/accuracy.report"
+fn = sys.argv[1]
 df = pd.read_csv(fn, sep='\t')
 df.plot(x='%Iter',y=['train_objective','valid_objective'])
-plt.savefig('error_curve.pdf') 
+plt.savefig(str(Path(fn).parent / 'error_curve.pdf'))
 
