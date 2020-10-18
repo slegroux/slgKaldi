@@ -27,7 +27,12 @@ log_time(){
 
 log_info(){
     msg=$1
-    echo -e "\n[INFO] $(date +'%Y-%m-%d-%H-%M-%S')" $msg | tee -a ${EXP_LOG}
+    echo -e "[INFO] $(date +'%Y-%m-%d-%H-%M-%S')" $msg | tee -a ${EXP_LOG}
+}
+
+log_err(){
+    msg=$1
+    echo - "[ERROR] $msg"| tee -a ${EXP_LOG}
 }
 
 log_wer(){
