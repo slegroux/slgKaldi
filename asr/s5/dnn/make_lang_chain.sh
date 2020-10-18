@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 # (c) 2020 Sylvain Le Groux <slegroux@ccrma.stanford.edu>
 
+# I: silence.csl, nonsilence.csl, lang, tri3
+# O: topo, sp_ali_lats, lang_chain, tree/final.mdl
+
+
 set -euo pipefail
 num_leaves=3500
 
