@@ -9,7 +9,7 @@
 
 # Begin configuration section.
 
-embedding_dim=800 #800
+embedding_dim=800
 lstm_rpd=200
 lstm_nrpd=200
 stage=-10
@@ -89,7 +89,7 @@ fi
 echo "rnnlm dir done"
 
 if [ $stage -le 3 ]; then
-  log_info rnnlm/train_rnnlm.sh --use-gpu true --use-gpu-for-diagnostics true --num-jobs-initial $n_gpu --num-jobs-final $n_gpu \
+  log_time rnnlm/train_rnnlm.sh --use-gpu true --use-gpu-for-diagnostics true --num-jobs-initial $n_gpu --num-jobs-final $n_gpu \
     --stage $train_stage --num-epochs $epochs --cmd "run.pl" $dir
 fi
 

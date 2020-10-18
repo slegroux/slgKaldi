@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 # (c) 2018 Sylvain Le Groux <slegroux@ccrma.stanford.edu>
 
+# TODO(slg):
+# - make sure log_info inside pushd is kept
+# - log ppl too
+
 order=3
 wordlist=
 limit_unk_history=true
@@ -40,8 +44,8 @@ cp ${train} $pocolm_data_dir/train.txt
 cp ${dev} $pocolm_data_dir/dev.txt
 
 POCOLM_PATH=${KALDI_ROOT}/tools/pocolm
+log_info "Train ${order}-gram LM with pocolm"
 pushd ${POCOLM_PATH}
-
 python2 scripts/train_lm.py \
   --limit-unk-history=${limit_unk_history} \
   --num-splits=100 \
