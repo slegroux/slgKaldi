@@ -28,7 +28,7 @@ if [ $stage -eq 0 ]; then
     for dataset in ${datasets}; do
         name=$(echo $(basename $dataset) | sed 's:-:_:g')
         if [ ! -d ${data}/${name} ]; then
-            ./data_prep/format_librispeech.py "${dataset}/*/*/*.flac" "${dataset}/*/*/*.trans.txt" "${data}/${name}"
+            ./data_prep/format_librispeech.py "${dataset}" "${data}/${name}"
             ./utils/fix_data_dir.sh ${data}/${name}
         fi
     done
@@ -126,12 +126,12 @@ if [ $stage -eq 8 ]; then
 fi
 
 if [ $stage -eq 9 ]; then
-    if [ ! -d ${rnnlm_data} ]; then
-        mkdir -p ${rnnlm_data}
-    fi
-    for text in ${lm_dir}/{train,dev}.txt; do
-        cp ${text} ${rnnlm_data}
-    done
+    # if [ ! -d ${rnnlm_data} ]; then
+    #     mkdir -p ${rnnlm_data}
+    # fi
+    # for text in ${lm_dir}/{train,dev}.txt; do
+    #     cp ${text} ${rnnlm_data}
+    # done
 
     ./lm/train_lstm_tdnn_lm.sh --stage ${rnn_stage} --train_stage ${rnn_train_stage} \
         --n_gpu ${rnn_gpu} --epochs ${rnn_epochs} \

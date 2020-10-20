@@ -10,14 +10,15 @@ from IPython import embed
 #   speakerid-chapter-uttid text
 
 @click.command()
-@click.argument("audio_path", default="/home/syl20/data/en/librispeech/LibriSpeech/dev-clean-2/*/*/*.flac")
-@click.argument("transcript_path", default="/home/syl20/data/en/librispeech/LibriSpeech/dev-clean-2/*/*/*.trans.txt")
-@click.argument("dst_path", default="experiments/en/minilibrispeech/data/dev_clean_2")
+
+@click.argument('dataset', default="/home/syl20/data/en/librispeech/LibriSpeech/dev-clean-2")
+@click.argument("dst_path", default="/tmp/libri")
 @click.option("--lang", default="en")
 
-def format_libri(audio_path, transcript_path, dst_path, lang):
+def format_libri(dataset:str, dst_path:str, lang:str):
     """Format librispeech dataset into kaldi compatible data folder"""
-
+    audio_path = str(Path(dataset) / "*/*/*.flac" )
+    transcript_path = str(Path(dataset) / "*/*/*.trans.txt")
     a = Audios(audio_path, lang='en', country='US', sid_from_path=lambda x: Path(x).parents[1].name)
     t = TranscriptsCSV(transcript_path, normalize=True, lang='en', country='US')
     ds = ASRDataset(a.audios, t.transcripts)
