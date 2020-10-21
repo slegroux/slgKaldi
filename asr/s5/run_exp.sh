@@ -28,7 +28,7 @@ if [ $stage -eq 0 ]; then
     for dataset in ${datasets}; do
         name=$(echo $(basename $dataset) | sed 's:-:_:g')
         if [ ! -d ${data}/${name} ]; then
-            ./data_prep/format_librispeech.py "${dataset}" "${data}/${name}"
+            log_time ./data_prep/format_librispeech.py "${dataset}" "${data}/${name}"
             ./utils/fix_data_dir.sh ${data}/${name}
         fi
     done
@@ -55,18 +55,20 @@ if [ $stage -eq 2 ]; then
     #     ${lang_dir} ${lm_dir}/${lm_order}-gram-srilm.arpa.gz ${dict}/lexicon.txt \
     #     ${lm}
 
-    ./lm/make_pocolm.sh --order ${lm_order} --limit_unk_history ${limit_unk_history} \
-        ${lm_train} ${lm_dev} ${lm_dir}
+    for order in ${lm_order}; do
+        ./lm/make_pocolm.sh --order ${order} --limit_unk_history ${limit_unk_history} \
+            ${lm_train} ${lm_dev} ${lm_dir}
 
-    log_info "Convert LM to FST"
-    utils/format_lm.sh \
-        ${lang_dir} ${lm_dir}/${lm_order}gram_unpruned.arpa.gz ${dict}/lexicon.txt \
-        ${lm}
+        log_info "Convert LM to FST"
+        utils/format_lm.sh \
+            ${lang_dir} ${lm_dir}/${order}gram_unpruned.arpa.gz ${dict}/lexicon.txt \
+            ${lang_dir}_$(basename ${train})_${order}g
+    done
 fi
 
 # FEATURES
 if [ $stage -eq 3 ]; then
-    for dataset in {${train},${test}}; do
+    for dataset in {${train},${test},${dev}}; do
         ./features/feature_extract.sh --feature_type "mfcc" --mfcc_config "conf/mfcc.conf" ${dataset} || exit 1
     done
 fi

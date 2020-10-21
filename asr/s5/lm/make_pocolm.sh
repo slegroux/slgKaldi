@@ -54,8 +54,8 @@ python2 scripts/train_lm.py \
   --min-counts="train=2" \
   ${pocolm_data_dir} ${order} ${lm_work_dir} ${unpruned_model_dir}
 
-log_time python2 scripts/format_arpa_lm.py ${unpruned_model_dir} | gzip -c > $pocolm_arpa_file
-log_time python2 scripts/get_data_prob.py $pocolm_data_dir/dev.txt $unpruned_model_dir 2>&1 | grep -F '[perplexity'
+python2 scripts/format_arpa_lm.py ${unpruned_model_dir} | gzip -c > $pocolm_arpa_file
+python2 scripts/get_data_prob.py $pocolm_data_dir/dev.txt $unpruned_model_dir 2>&1 | grep -F '[perplexity'
 popd
 
 exit 0

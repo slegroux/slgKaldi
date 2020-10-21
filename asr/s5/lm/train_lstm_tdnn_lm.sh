@@ -29,7 +29,7 @@ text_dir=$3
 #dev_sents=10000
 
 mkdir -p $dir/config
-mkdir -p $
+#  mkdir -p $
 set -e
 
 for f in $text $wordlist; do
@@ -89,7 +89,8 @@ fi
 echo "rnnlm dir done"
 
 if [ $stage -le 3 ]; then
-  log_time rnnlm/train_rnnlm.sh --use-gpu true --use-gpu-for-diagnostics true --num-jobs-initial $n_gpu --num-jobs-final $n_gpu \
+# --use-gpu yes --use-gpu-for-diagnostics true
+  log_time rnnlm/train_rnnlm.sh --num-jobs-initial 1 --num-jobs-final 1 \
     --stage $train_stage --num-epochs $epochs --cmd "run.pl" $dir
 fi
 
