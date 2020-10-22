@@ -17,6 +17,7 @@ train_stage=-10
 epochs=40
 n_gpu=8
 unk="<UNK>"
+top_word_features=5000
 
 . utils.sh
 . cmd.sh
@@ -48,7 +49,7 @@ if [ $stage -le 1 ]; then
   echo ${unk} >$dir/config/oov.txt
 
   cat > $dir/config/data_weights.txt <<EOF
-train 1 1.0
+train 4 4.0
 EOF
 
   rnnlm/get_unigram_probs.py --vocab-file=$dir/config/words.txt \
@@ -56,12 +57,11 @@ EOF
                              --data-weights-file=$dir/config/data_weights.txt \
                              $text_dir | awk 'NF==2' >$dir/config/unigram_probs.txt
 
-
+  # --min-frequency 1.0e-03 \
   rnnlm/choose_features.py --unigram-probs=$dir/config/unigram_probs.txt \
                            --use-constant-feature=true \
-                           --top-word-features=10000 \
-                           --min-frequency 1.0e-03 \
-                           --special-words='<s>,</s>,<brk>,<UNK>' \
+                           --top-word-features=${top_word_features} \
+                           --special-words='<s>,</s>,<brk>,<UNK>,<SPOKEN_NOISE>' \
                            $dir/config/words.txt > $dir/config/features.txt
   
   rnnlm/validate_features.py $dir/config/features.txt
@@ -83,15 +83,18 @@ if [ $stage -le 2 ]; then
   # the --unigram-factor option is set larger than the default (100)
   # in order to reduce the size of the sampling LM, because rnnlm-get-egs
   # was taking up too much CPU (as much as 10 cores).
-  rnnlm/prepare_rnnlm_dir.sh --unigram-factor 100.0 \
+  rnnlm/prepare_rnnlm_dir.sh --unigram-factor 100 \
     $text_dir $dir/config $dir
 fi
 echo "rnnlm dir done"
 
 if [ $stage -le 3 ]; then
-# --use-gpu yes --use-gpu-for-diagnostics true
-  log_time rnnlm/train_rnnlm.sh --num-jobs-initial 1 --num-jobs-final 1 \
-    --stage $train_stage --num-epochs $epochs --cmd "run.pl" $dir
+# --use-gpu true --use-gpu-for-diagnostics true
+  log_time rnnlm/train_rnnlm.sh --cmd "run.pl" \
+    --num-jobs-initial 1 --num-jobs-final ${n_gpu} \
+    --stage $train_stage --num-epochs $epochs \
+    --use-gpu true --use-gpu-for-diagnostics true \
+    $dir
 fi
 
 

@@ -118,7 +118,8 @@ if [ $stage -eq 7 ]; then
     # train on hires (_sp_vp_hires)
     ./dnn/dnn_training.sh --train_stage ${train_stage} --n_gpu ${n_gpu} --num_epochs ${num_epochs} --remove_egs ${remove_egs} \
         ${train}_sp_vp_hires ${lat_dir} ${ivec_data} ${tree} ${mdl}
-    ./eval/plot_error_curve.py ${mdl}/accuracy.report
+    ./steps/nnet3/report/generate_plots.py --is-chain true ${mdl} ${mdl}/report/
+    # scp syl20@dx05:${mdl}/report/log_probability_output.pdf .
     steps/info/chain_dir_info.pl ${mdl}
 fi
 
@@ -128,29 +129,39 @@ if [ $stage -eq 71 ]; then
     ./features/feature_extract.sh --feature_type "mfcc" --mfcc_config conf/mfcc_hires.conf ${test}_hires
     ./embeddings/ivector_extract.sh ${test}_hires ${ivec_extractor} ${test}_hires/ivectors
     # decode folder: decode_"lm_name"_"test_data"
-    ./dnn/dnn_testing.sh --compute_graph true ${test}_hires ${lang_test} ${tree} ${graph} ${test}_hires/ivectors ${mdl} ${decode_test_name}
-    # ./dnn/dnn_testing.sh --compute_graph false ${test}_hires ${lang_test} ${tree} ${graph} ${test}_hires/ivectors ${mdl} ${decode_test_name}
+    if [ -d ${graph} ]; then
+        ./dnn/dnn_testing.sh --compute_graph false ${test}_hires ${lang_test} ${tree} ${graph} ${test}_hires/ivectors ${mdl} ${decode_test_name}
+    else
+        ./dnn/dnn_testing.sh --compute_graph true ${test}_hires ${lang_test} ${tree} ${graph} ${test}_hires/ivectors ${mdl} ${decode_test_name}
+    fi
+fi
+
+if [ $stage -eq 8 ]; then
+    ./rescoring/ngram_rescoring.sh ${old_lm} ${new_lm} ${test}_hires ${mdl}/${decode_test_name}
 fi
 
 if [ $stage -eq 9 ]; then
-    # if [ ! -d ${rnnlm_data} ]; then
-    #     mkdir -p ${rnnlm_data}
-    # fi
-    # for text in ${lm_dir}/{train,dev}.txt; do
-    #     cp ${text} ${rnnlm_data}
-    # done
+    if [ ! -d ${rnnlm_data} ]; then
+        mkdir -p ${rnnlm_data}
+        for text in ${lm_dir}/{train,dev}.txt; do
+            cp ${text} ${rnnlm_data}
+        done
+    fi
 
-    ./lm/train_lstm_tdnn_lm.sh --stage ${rnn_stage} --train_stage ${rnn_train_stage} \
+    ./lm/train_lstm_tdnn_lm.sh \
+        --stage ${rnn_stage} \
+        --train_stage ${rnn_train_stage} \
         --n_gpu ${rnn_gpu} --epochs ${rnn_epochs} \
+        --embedding_dim ${rnnlm_embedding_dim} \
+        --lstm_rpd ${lstm_rpd} \
+        --lstm_nrpd ${lstm_nrpd} \
         ${rnnlm_dir} ${wordlist} ${rnnlm_data}
 fi
 
-if [ $stage -eq 10 ]; then
+if [ $stage -eq 91 ]; then
     ./rescoring/rescore_pruned.sh --ngram-order ${rescore_ngram_order} ${lm} ${rnnlm_dir} ${rnnlm_test} ${decode_og} ${decode_rnnlm}
 fi
 
-if [ $stage -eq 11 ]; then
-    ./steps/nnet3/report/generate_plots.py --is-chain true ${mdl} ${mdl}/report/
-    # copy report locally
-    # scp syl20@172.21.150.75:/home/syl20/kaldi-gc/kaldi_egs/commonvoice_spanish/s5/experiments/es/commonvoice/exp/chain/tdnnf_tedlium/report/{log_probability_output,log_probability_output-xent}.pdf .
+if [ $stage -eq 10 ]; then
+
 fi
