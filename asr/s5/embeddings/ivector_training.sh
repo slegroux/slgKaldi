@@ -6,6 +6,7 @@ set -euo pipefail
 online_cmvn_iextractor=false
 num_frames=700000
 nj=6
+subset_factor=4
 
 . utils.sh
 . path.sh
@@ -34,7 +35,7 @@ log_info "Computing a subset of data to train the diagonal UBM."
 
 # We'll use about a quarter of the data.
 num_utts_total=$(wc -l <${dataset}/utt2spk)
-num_utts=$[$num_utts_total/4]
+num_utts=$[$num_utts_total/${subset_factor}]
 utils/data/subset_data_dir.sh ${dataset} \
     $num_utts ${dataset}_subset
 

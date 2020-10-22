@@ -95,14 +95,18 @@ if [ $stage -eq 5 ]; then
     # input: ${dataset} => output: ${dataset]_sp tri3_sp_ali ${dataset}_sp_vp_hires
     ./embeddings/ivector_data_prep.sh ${train} ${lang_dir} ${tri3}
     # input: hires (sp_vp_hires) data => output exp/ivector_extractor and ${dataset}_sp_vp_hires/ivector_data
-    ./embeddings/ivector_training.sh --nj ${nj_ivec_extract} --online_cmvn_iextractor ${online_cmvn_iextractor} ${train}_sp_vp_hires ${tri3} ${ivec_model} || exit 1
+    ./embeddings/ivector_training.sh --nj ${nj_ivec_extract} \
+        --online_cmvn_iextractor ${online_cmvn_iextractor} --subset_factor ${subset_factor} \
+        ${train}_sp_vp_hires ${tri3} ${ivec_model}
     # echo "skip i-vector training"
 fi
 
 # pre-trained i-vectors
 if [ $stage -eq 6 ]; then
     # TODO(slg): why do we pertub ? should it just be hires and that's it for computing i-vector and decoding?
-    ./data_augment/make_sp_vp_hires.sh ${train} # only needed if using pre-trained i-vector extractor. else stage 5 will provide it
+    if [ ! -d ${train}_sp_vp_hires ]; then
+        ./data_augment/make_sp_vp_hires.sh ${train} # only needed if using pre-trained i-vector extractor. else stage 5 will provide it
+    fi
     ./embeddings/ivector_extract.sh ${train}_sp_vp_hires ${ivec_extractor} ${train}_sp_vp_hires/ivectors || exit 1
 fi
 
@@ -115,9 +119,10 @@ if [ $stage -eq 7 ]; then
     ./dnn/dnn_training.sh --train_stage ${train_stage} --n_gpu ${n_gpu} --num_epochs ${num_epochs} --remove_egs ${remove_egs} \
         ${train}_sp_vp_hires ${lat_dir} ${ivec_data} ${tree} ${mdl}
     ./eval/plot_error_curve.py ${mdl}/accuracy.report
+    steps/info/chain_dir_info.pl ${mdl}
 fi
 
-if [ $stage -eq 8 ]; then
+if [ $stage -eq 71 ]; then
     # extract feats for test set
     utils/copy_data_dir.sh ${test} ${test}_hires
     ./features/feature_extract.sh --feature_type "mfcc" --mfcc_config conf/mfcc_hires.conf ${test}_hires

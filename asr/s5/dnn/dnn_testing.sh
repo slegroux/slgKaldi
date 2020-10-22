@@ -1,10 +1,7 @@
 #!/usr/bin/env bash
 # (c) 2020 Sylvain Le Groux <slegroux@ccrma.stanford.edu>
 
-#online_cmvn=true #tdnn
-online_cmvn=false #cnn-tdnn
-# chunk_width=140,100,160
-chunk_width=150,110,100 #tedlium
+
 compute_graph=true
 
 . utils.sh
@@ -31,14 +28,12 @@ if $compute_graph; then
     ${tree_dir} ${graph_dir}
 fi
 
-frames_per_chunk=$(echo $chunk_width | cut -d, -f1)
 rm $mdl/.error 2>/dev/null || true
 
 #Decoder
 log_info "dnn decoding"
 log_time steps/nnet3/decode.sh \
     --acwt 1.0 --post-decode-acwt 10.0 \
-    --frames-per-chunk $frames_per_chunk \
     --nj $nj --cmd "run.pl" \
     --online-ivector-dir $ivector_data \
     ${graph_dir} ${test_set} ${mdl}/${decode_dir}

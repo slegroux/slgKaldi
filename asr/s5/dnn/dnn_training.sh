@@ -8,14 +8,17 @@ train_stage=-10
 num_epochs=5
 
 srand=0
-chunk_width=150,110,100 #tedlium s5_r3
-# chunk_width=140,100,160 #rdi
+chunk_width=150,110,100 #frames per egs # chunk_width=140,100,160 #rdi
 xent_regularize=0.1
 dropout_schedule='0,0@0.20,0.5@0.50,0'
-frames_per_iter=5000000
+frames_per_iter=2500000
+initial_effective_lrate=0.00025
+final_effective_lrate=0.00025
 
 common_egs_dir=
-remove_egs=false
+remove_egs=true
+get_egs_stage=-10
+
 reporting_email=
 online_cmvn=false
 n_gpu=8
@@ -50,18 +53,19 @@ log_time steps/nnet3/chain/train.py --stage=$train_stage \
   --chain.l2-regularize=0.0 \
   --chain.apply-deriv-weights false \
   --chain.lm-opts="--num-extra-lm-states=2000" \
-  --trainer.dropout-schedule $dropout_schedule \
-  --trainer.add-option="--optimization.memory-compression-level=2" \
   --egs.dir="$common_egs_dir" \
+  --egs.stage $get_egs_stage \
   --egs.opts="--frames-overlap-per-eg 0 --constrained false --online-cmvn $online_cmvn" \
   --egs.chunk-width=$chunk_width \
+  --trainer.dropout-schedule $dropout_schedule \
+  --trainer.add-option="--optimization.memory-compression-level=2" \
   --trainer.num-chunk-per-minibatch=64 \
   --trainer.frames-per-iter=$frames_per_iter \
   --trainer.num-epochs=${num_epochs} \
   --trainer.optimization.num-jobs-initial=$n_gpu \
   --trainer.optimization.num-jobs-final=$n_gpu \
-  --trainer.optimization.initial-effective-lrate=0.00025 \
-  --trainer.optimization.final-effective-lrate=0.000025 \
+  --trainer.optimization.initial-effective-lrate=${initial_effective_lrate} \
+  --trainer.optimization.final-effective-lrate=${final_effective_lrate} \
   --trainer.max-param-change 2.0 \
   --cleanup.remove-egs=$remove_egs \
   --use-gpu=wait \
