@@ -5,10 +5,11 @@
 [![made-with-VSCode](https://img.shields.io/badge/Made%20for-VSCode-1f425f.svg)](https://code.visualstudio.com/)
 [![Generic badge](https://img.shields.io/badge/Made%20for-Kaldi-1f425f.svg)](https://shields.io/)
 
-# Easy Kaldi
+# ASR
 ## Description
-A collection of scripts based on [Kaldi](https://github.com/kaldi-asr/kaldi) for speech recognition, diarization & language modeling
-### Speech Recognition [asr](asr)
+A collection of scripts for speech recognition based on [Kaldi](https://github.com/kaldi-asr/kaldi) and meant to simplify the training process as much as possible.
+
+### Speech Recognition
 - 1. Data prep
 - 2. Lexicon generation
 - 3. Grammar generation (pocolm & srilm)
@@ -20,20 +21,14 @@ A collection of scripts based on [Kaldi](https://github.com/kaldi-asr/kaldi) for
 - 9. RNNLM training
 - 10. Rescoring
 
-### Diarization [diarization](diarization)
-- 1. i-vector (LIUM)
-- 2. x-vector (Kaldi)
 
-## Installation
-### Dependencies
-- depends on: [Kaldi](https://github.com/kaldi-asr/kaldi) & [slgasr](https://github.com/slegroux/slgasr)
-- Refer to respective projects for install info
+## Datasets
+| English | Spanish |
+| --- | --- |
+| [common voice](https://commonvoice.mozilla.org/en/datasets) | [common voice](https://commonvoice.mozilla.org/en/datasets) |
+| | [heroico](https://www.openslr.org/resources.php) |
+| | dimex |
 
-## Free Datasets
-- [OpenSLR](https://www.openslr.org/resources.php)
-
-## Pretrained models
-- [kaldi-asr](http://kaldi-asr.org/models.html)  
 
 ## License
 [GPL](https://www.gnu.org/licenses/gpl-3.0-standalone.html)
