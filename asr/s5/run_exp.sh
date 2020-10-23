@@ -89,7 +89,7 @@ if [ $stage -eq 41 ]; then
 fi
 
 
-# i-vector training & extract
+# IVECTOR TRAINING
 if [ $stage -eq 5 ]; then
     # data augment end extract hires mfcc
     # input: ${dataset} => output: ${dataset]_sp tri3_sp_ali ${dataset}_sp_vp_hires
@@ -101,7 +101,7 @@ if [ $stage -eq 5 ]; then
     # echo "skip i-vector training"
 fi
 
-# pre-trained i-vectors
+# IVECTOR EXTRACTION
 if [ $stage -eq 6 ]; then
     # TODO(slg): why do we pertub ? should it just be hires and that's it for computing i-vector and decoding?
     if [ ! -d ${train}_sp_vp_hires ]; then
@@ -110,6 +110,7 @@ if [ $stage -eq 6 ]; then
     ./embeddings/ivector_extract.sh ${train}_sp_vp_hires ${ivec_extractor} ${train}_sp_vp_hires/ivectors || exit 1
 fi
 
+# DNN TRAINING
 if [ $stage -eq 7 ]; then
     # use lores (_sp) implicitely align on _sp and generate align lats on _sp_lats
     ./dnn/make_lang_chain.sh ${train}_sp ${tri3} ${lang_dir} ${lang_chain} ${tree}
@@ -123,6 +124,7 @@ if [ $stage -eq 7 ]; then
     steps/info/chain_dir_info.pl ${mdl}
 fi
 
+# DNN TESTING
 if [ $stage -eq 71 ]; then
     # extract feats for test set
     utils/copy_data_dir.sh ${test} ${test}_hires
@@ -136,10 +138,12 @@ if [ $stage -eq 71 ]; then
     fi
 fi
 
+# RESCORING
 if [ $stage -eq 8 ]; then
     ./rescoring/ngram_rescoring.sh ${old_lm} ${new_lm} ${test}_hires ${mdl}/${decode_test_name}
 fi
 
+# RNNLM TRAINING
 if [ $stage -eq 9 ]; then
     if [ ! -d ${rnnlm_data} ]; then
         mkdir -p ${rnnlm_data}
@@ -158,10 +162,35 @@ if [ $stage -eq 9 ]; then
         ${rnnlm_dir} ${wordlist} ${rnnlm_data}
 fi
 
+# RNNLM TESTING
 if [ $stage -eq 91 ]; then
     ./rescoring/rescore_pruned.sh --ngram-order ${rescore_ngram_order} ${lm} ${rnnlm_dir} ${rnnlm_test} ${decode_og} ${decode_rnnlm}
 fi
 
+# ONLINE DECODING
 if [ $stage -eq 10 ]; then
+    if [ ! -d ${mdl}_online ]; then
+        steps/online/nnet3/prepare_online_decoding.sh \
+            --mfcc-config conf/mfcc_hires.conf \
+            ${lang_chain} ${ivec_extractor} ${mdl} ${mdl}_online
+    fi
+
+    nj=$(get_njobs $test)
+    steps/online/nnet3/decode.sh \
+          --acwt 1.0 --post-decode-acwt 10.0 \
+          --nj $nj --cmd "run.pl" \
+          ${graph} ${test} ${online_decode_dir}
+    log_wer ${online_decode_dir}
 
 fi
+
+# SERVER
+if [ $stage -eq 11 ]; then
+    server/start_tcp_server.sh \
+        --samp_freq ${samp_freq} \
+        --online_conf ${online_conf} \
+        --port_num ${port_num} \
+        ${mdl}_online ${graph} ${wordlist}
+
+fi
+
