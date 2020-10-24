@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # (c) 2020 Sylvain Le Groux <slegroux@ccrma.stanford.edu>
 # TODO(slg): parallelize
+# TODO(slg): keep kaldi logs not just echo
+
 
 stage=0
 
@@ -69,7 +71,11 @@ fi
 # FEATURES
 if [ $stage -eq 3 ]; then
     for dataset in {${train},${test},${dev}}; do
-        ./features/feature_extract.sh --feature_type "mfcc" --mfcc_config "conf/mfcc.conf" ${dataset} || exit 1
+        if [ ! -f ${dataset}/feats.scp ]; then
+            ./features/feature_extract.sh --feature_type "mfcc" --mfcc_config "conf/mfcc.conf" ${dataset} || exit 1
+        else
+            log_info "feats already computed"
+        fi
     done
 fi
 
@@ -84,7 +90,9 @@ fi
 
 # HMM testing
 if [ $stage -eq 41 ]; then
-    ./utils/data/subset_data_dir.sh ${test} 1000 ${test}_1000
+    if [ ! -d ${test}_1000 ]; then
+        ./utils/data/subset_data_dir.sh ${test} 1000 ${test}_1000
+    fi
     ./hmm/am_testing.sh --mono false --compile_graph true ${test}_1000 ${lm} ${tri3} ${tri3}/graph_test_1000 || exit 1
 fi
 
@@ -181,16 +189,25 @@ if [ $stage -eq 10 ]; then
           --nj $nj --cmd "run.pl" \
           ${graph} ${test} ${online_decode_dir}
     log_wer ${online_decode_dir}
-
 fi
 
-# SERVER
+# UPLOAD MODEL
+if [ $stage -eq 101 ]; then
+    ./models/archive_model.sh ${online_mdl} ${archive_name}
+    ./models/upload_model_to_s3.sh ${lang} models/${archive_name}
+fi
+
+# RUN SERVER
 if [ $stage -eq 11 ]; then
     server/start_tcp_server.sh \
         --samp_freq ${samp_freq} \
         --online_conf ${online_conf} \
         --port_num ${port_num} \
         ${mdl}_online ${graph} ${wordlist}
-
 fi
 
+# TEST SERVER
+if [ $stage -eq 12 ]; then
+    ./server/test_tcp_server.sh ${test_audio}
+    echo $test_transcript
+fi
