@@ -193,7 +193,7 @@ fi
 
 # UPLOAD MODEL
 if [ $stage -eq 101 ]; then
-    ./models/archive_model.sh ${online_mdl} ${archive_name}
+    ./models/archive_model.sh ${online_mdl} ${graph} ${archive_name}
     ./models/upload_model_to_s3.sh ${lang} models/${archive_name}
 fi
 
