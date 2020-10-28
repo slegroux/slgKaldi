@@ -51,9 +51,13 @@ fi
 # use the same num-jobs as the alignments
 
 log_info "Get alignments as lattices"
-log_time steps/align_fmllr_lats.sh --nj ${nj} --cmd "run.pl" ${dataset} \
-  ${lang} ${tri3} ${tri3}_sp_ali_lats
-rm ${tri3}_sp_ali_lats/fsts.*.gz # save space
+if [ ! -f ${tri3}_sp_ali_lats/lat.1.gz ]; then
+  log_time steps/align_fmllr_lats.sh --nj ${nj} --cmd "run.pl" ${dataset} \
+    ${lang} ${tri3} ${tri3}_sp_ali_lats
+  rm ${tri3}_sp_ali_lats/fsts.*.gz # save space
+else
+  log_info "Alignments already computed"
+fi
 
 
 # Build a tree using our new topology.  We know we have alignments for the
