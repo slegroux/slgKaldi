@@ -55,7 +55,7 @@ python2 scripts/train_lm.py \
   ${pocolm_data_dir} ${order} ${lm_work_dir} ${unpruned_model_dir}
 
 python2 scripts/format_arpa_lm.py ${unpruned_model_dir} | gzip -c > $pocolm_arpa_file
-python2 scripts/get_data_prob.py $pocolm_data_dir/dev.txt $unpruned_model_dir 2>&1 | grep -F '[perplexity'
+python2 scripts/get_data_prob.py $pocolm_data_dir/dev.txt $unpruned_model_dir 2>&1 | grep -F '[perplexity' | tee -a ${EXP_LOG}
 popd
 
 exit 0

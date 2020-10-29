@@ -2,8 +2,7 @@
 # (c) 2020 Sylvain Le Groux <slegroux@ccrma.stanford.edu>
 
 # I: silence.csl, nonsilence.csl, lang, tri3
-# O: topo, sp_ali_lats, lang_chain, tree/final.mdl
-
+# O: topo, sp_ali_lats, sp_ali, lang_chain, tree/final.mdl
 
 set -euo pipefail
 num_leaves=3500
@@ -19,7 +18,6 @@ lang_chain=$4
 tree_dir=$5
 
 nj=$(get_njobs $dataset)
-
 
 log_info "Create lang directory with chain-type topology"
 # Create a version of the lang/ directory that has one state per phone in the
@@ -56,9 +54,16 @@ if [ ! -f ${tri3}_sp_ali_lats/lat.1.gz ]; then
     ${lang} ${tri3} ${tri3}_sp_ali_lats
   rm ${tri3}_sp_ali_lats/fsts.*.gz # save space
 else
-  log_info "Alignments already computed"
+  log_info "SP alignments as lattices already computed "
 fi
 
+if [ ! -f ${tri3}_sp_ali/ali.1.gz ]; then
+  log_info "compute sp alignemnts for tree building"
+  log_time steps/align_fmllr.sh --nj $nj \
+    ${dataset} ${lang} ${tri3} ${tri3}_sp_ali
+else
+  log_info "SP alignments already computed"
+fi
 
 # Build a tree using our new topology.  We know we have alignments for the
 # speed-perturbed data (local/nnet3/ivector_common.sh made them), so use
@@ -69,13 +74,8 @@ if [ -f $tree_dir/final.mdl ]; then
   exit 1;
 fi
 
-if [ ! -f ${tri3}_sp_ali/ali.1.gz ]; then
-  log_info "compute sp alignemnts for tree building"
-  log_time steps/align_fmllr.sh --nj $nj \
-    ${dataset} ${lang} ${tri3} ${tri3}_sp_ali
-fi
-
-steps/nnet3/chain/build_tree.sh \
+log_info "Build tree"
+log_time steps/nnet3/chain/build_tree.sh \
   --frame-subsampling-factor 3 \
   --context-opts "--context-width=2 --central-position=1" \
   --cmd "run.pl" ${num_leaves} ${dataset} \

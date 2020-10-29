@@ -6,6 +6,8 @@ set -euo pipefail
 online_cmvn_iextractor=false
 num_frames=700000
 nj=6
+num_threads=4
+num_processes=2
 subset_factor=4
 
 . utils.sh
@@ -15,6 +17,8 @@ subset_factor=4
 dataset=$1
 tri3=$2
 ivec_model=$3
+
+log_info "I-vector training"
 
 if ! cuda-compiled; then
   cat <<EOF && exit 1
@@ -62,10 +66,11 @@ log_time steps/online/nnet2/train_diag_ubm.sh --cmd "run.pl" --nj $nj_diag_ubm \
 # 100.
 log_info "train iVector extractor on full sp_vp_hires dataset"
 log_time steps/online/nnet2/train_ivector_extractor.sh --cmd "run.pl" --nj $nj \
+  --num-threads ${num_threads} --num-processes ${num_processes} \
   --online-cmvn-iextractor $online_cmvn_iextractor \
   ${dataset} ${ivec_model}/diag_ubm \
   ${ivec_model}/extractor || exit 1;
-#  --num-threads 4 --num-processes 2 \
+
 
 # We extract iVectors on the speed-perturbed training data after combining
 # short segments, which will be what we train the system on.  With

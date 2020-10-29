@@ -52,3 +52,12 @@ filter_from_list(){
     mv ${src} ${src}.tmp
     cat ${src}.tmp |grep -v -f ${blacklist} >${src}
 }
+
+get_audio_duration(){
+    file_list=$(</dev/stdin)
+    secs=$(echo "$file_list" | parallel -I{} --max-args $(( $nproc -2 )) soxi -D {}|paste -sd+|xargs -I% echo '(%)'|bc)
+    # convert float to int
+    printf -v i %.0f $secs
+    declare hr=$( echo "$i/3600"|bc) min=$(echo "$i/60%60"|bc) sec=$(echo "$i%60"|bc);
+    printf "duration: %02d:%02d:%02d\n" $hr $min $sec
+}
