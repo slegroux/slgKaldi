@@ -16,7 +16,8 @@ source ${config}
 # https://kaldi-asr.org/doc/data_prep.html
 
 if [ $stage -eq 0 ]; then
-    # commonvoice
+    echo "Data prep"
+    # ES COMMONVOICE
     # for dataset in ${datasets}; do
     #     name=$(basename $dataset .tsv)
     #     if [ ! -d ${data}/${name} ]; then
@@ -25,20 +26,17 @@ if [ $stage -eq 0 ]; then
     #     fi
     # done
 
-    # webex train
+    # ES WEBEX train
+    # if [ ! -f ${train}/wav.scp ]; then
+    #     ./data_prep/format_es_webex.py ${webex_train_csv} ${webex_train_audio} ${train}
+    #     ./utils/fix_data_dir.sh ${train}
+    # fi
+    # if [ ! -f ${test}/wav.scp ]; then
+    #     ./data_prep/format_es_webex.py ${webex_tst_csv} ${webex_tst_audio} ${test}
+    #     ./utils/fix_data_dir.sh ${test}
+    # fi
 
-    if [ ! -f ${data}/${name}/wav.scp ]; then
-        ./data_prep/format_es_webex.py ${webex_train_csv} ${webex_train_audio} ${train}
-        ./utils/fix_data_dir.sh ${data}/${name}
-    fi
-
-    # webex test
-    if [ ! -f ${data}/${name}/wav.scp ]; then
-        ./data_prep/format_es_webex.py ${webex_tst_csv} ${webex_tst_audio} ${test}
-        ./utils/fix_data_dir.sh ${data}/${name}
-    fi
-
-    # librispeech
+    # EN LIBRISPEECH
     # log_info "Data Kaldi formatting"
     # for dataset in ${datasets}; do
     #     name=$(echo $(basename $dataset) | sed 's:-:_:g')
@@ -47,6 +45,10 @@ if [ $stage -eq 0 ]; then
     #         ./utils/fix_data_dir.sh ${data}/${name}
     #     fi
     # done
+    
+    # EN WEBEX
+
+
 fi
 
 # L
@@ -98,10 +100,17 @@ fi
 # HMM-GMM
 if [ $stage -eq 4 ]; then
     # TODO(slg): figure out nj settings
-    ./hmm/monophone_training.sh --nj ${nj_mono} --boost-silence ${boost_silence} --subset ${subset} ${train} ${lm} ${mono} || exit 1
-    ./hmm/triphone_training.sh --boost-silence ${boost_silence} ${train} ${lm} ${mono}_ali ${tri1} || exit 1
-    ./hmm/lda_mllt_training.sh ${train} ${lm} ${tri1}_ali ${tri2} || exit 1
-    ./hmm/sat_training.sh ${train} ${lm} ${tri2}_ali ${tri3} || exit 1
+    ./hmm/monophone_training.sh --nj ${nj_mono} --mono_config ${mono_config} --boost-silence ${boost_silence} --subset ${subset} \
+        ${train} ${lm} ${mono} || exit 1
+    ./hmm/triphone_training.sh --boost-silence ${boost_silence} \
+        --cluster_thresh ${cluster_thresh_tri} --num_leaves ${num_leaves_tri} --tot_gauss ${tot_gauss_tri} \
+        ${train} ${lm} ${mono}_ali ${tri1} || exit 1
+    ./hmm/lda_mllt_training.sh \
+        --num_leaves ${num_leaves_lda} --tot_gauss ${tot_gauss_lda} \
+        ${train} ${lm} ${tri1}_ali ${tri2} || exit 1
+    ./hmm/sat_training.sh \
+         --num_leaves ${num_leaves_sat} --tot_gauss ${tot_gauss_sat} \
+    ${train} ${lm} ${tri2}_ali ${tri3} || exit 1
 fi
 
 # HMM testing
