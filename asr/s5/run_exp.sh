@@ -10,7 +10,11 @@ stage=0
 . utils/parse_options.sh
 
 config=$1
-source ${config}
+
+if [ ! -z ${config} ]; then
+    echo "using config ${config}"
+    source ${config}
+fi
 
 # DATA PREP
 # https://kaldi-asr.org/doc/data_prep.html
@@ -48,42 +52,20 @@ if [ $stage -eq 0 ]; then
     
     # EN WEBEX
 
-
 fi
 
 # L
 # https://kaldi-asr.org/doc/data_prep.html#data_prep_lang
 if [ $stage -eq 1 ]; then
     ./data_prep/make_L.sh --unk ${unk} --lang ${lang} ${lexicon} ${dict} ${lang_dir} || exit 1
-    echo "number of non silent phones:" $(cat ${dict}/nonsilence_phones.txt|wc -l)
-    echo "vocabulary size: " $(cat ${lang_dir}/words.txt|wc -l)
 fi
-
 
 # G
 #  https://kaldi-asr.org/doc/data_prep.html#data_prep_grammar
 # TODO(slg): download corpus + pocolm
+
 if [ $stage -eq 2 ]; then
-    if [ ! -d ${lm_dir} ]; then
-        mkdir -p ${lm_dir}
-    fi
-    ./data_prep/prepare_text.sh ${corpus_train} ${lm_train} || exit 1
-    ./data_prep/prepare_text.sh ${corpus_dev} ${lm_dev} || exit 1
-
-    # ./lm/make_srilm.sh --unk ${unk} ${lm_train} ${lm_dir}
-    # utils/format_lm.sh \
-    #     ${lang_dir} ${lm_dir}/${lm_order}-gram-srilm.arpa.gz ${dict}/lexicon.txt \
-    #     ${lm}
-
-    for order in ${lm_order}; do
-        ./lm/make_pocolm.sh --order ${order} --limit_unk_history ${limit_unk_history} \
-            ${lm_train} ${lm_dev} ${lm_dir} || exit 1
-
-        log_info "Convert LM to FST"
-        utils/format_lm.sh \
-            ${lang_dir} ${lm_dir}/${order}gram_unpruned.arpa.gz ${dict}/lexicon.txt \
-            ${lang_dir}_$(basename ${train})_${order}g || exit 1
-    done
+    ./data_prep/make_G.sh --limit_unk_history ${limit_unk_history} ${corpus_train} ${corpus_dev} ${lang_dir} ${dict}/lexicon.txt ${lm_dir}
 fi
 
 # FEATURES

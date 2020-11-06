@@ -3,6 +3,7 @@
 
 unk="<UNK>"
 lang='es'
+conf=
 
 . utils.sh
 . path.sh
@@ -11,6 +12,10 @@ lang='es'
 lexicon=$1
 dict=$2
 lang_dir=$3
+
+if [ ! -z $conf ]; then
+    source ${conf}
+fi
 
 tmp=$(mktemp -d /tmp/lang-XXXX) #data/local/lang
 
@@ -29,3 +34,6 @@ log_info "Prepare lang"
 log_time ./utils/prepare_lang.sh \
     ${dict} ${unk} \
     ${tmp} ${lang_dir}
+
+log_info "number of non silent phones:" $(cat ${dict}/nonsilence_phones.txt|wc -l)
+log_info "vocabulary size: " $(cat ${lang_dir}/words.txt|wc -l)
